@@ -1,0 +1,731 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics - Revolutionary Invoice System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="display-6 fw-bold text-primary mb-1">
+                            <i data-feather="trending-up" class="me-2"></i>
+                            Business Analytics
+                        </h1>
+                        <p class="text-muted mb-0">AI-powered insights and comprehensive business intelligence</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="d-flex gap-2 justify-content-end">
+                            <div class="dropdown">
+                                <button class="btn btn-outline-primary glass-btn dropdown-toggle" data-bs-toggle="dropdown">
+                                    <i data-feather="calendar" class="me-1"></i> Time Range
+                                </button>
+                                <ul class="dropdown-menu glass-dropdown">
+                                    <li><a class="dropdown-item" href="?range=7d">Last 7 Days</a></li>
+                                    <li><a class="dropdown-item" href="?range=30d">Last 30 Days</a></li>
+                                    <li><a class="dropdown-item" href="?range=90d">Last 3 Months</a></li>
+                                    <li><a class="dropdown-item" href="?range=12m" class="active">Last 12 Months</a></li>
+                                    <li><a class="dropdown-item" href="?range=all">All Time</a></li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-success glass-btn" onclick="exportAnalyticsReport()">
+                                <i data-feather="download" class="me-1"></i> Export Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Key Performance Indicators -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="glass-card p-4 kpi-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold text-success mb-1">₹{{ "%.0f"|format(analytics_data.revenue_trends.summary.total_revenue if analytics_data.revenue_trends.summary else 0) }}</h3>
+                        <p class="text-muted mb-0 small">Total Revenue</p>
+                        <small class="text-success">
+                            <i data-feather="trending-up" size="14"></i> +{{ "%.1f"|format(12.5) }}% vs last period
+                        </small>
+                    </div>
+                    <div class="kpi-icon bg-success bg-opacity-10 text-success">
+                        <i data-feather="dollar-sign" size="32"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="glass-card p-4 kpi-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold text-primary mb-1">{{ analytics_data.profitability_analysis.overall.profit_margin_percentage if analytics_data.profitability_analysis.overall else 0 }}%</h3>
+                        <p class="text-muted mb-0 small">Profit Margin</p>
+                        <small class="text-primary">
+                            <i data-feather="trending-up" size="14"></i> Healthy margin
+                        </small>
+                    </div>
+                    <div class="kpi-icon bg-primary bg-opacity-10 text-primary">
+                        <i data-feather="percent" size="32"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="glass-card p-4 kpi-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold text-info mb-1">{{ analytics_data.payment_analytics.avg_payment_delay_days if analytics_data.payment_analytics else 0 }}</h3>
+                        <p class="text-muted mb-0 small">Avg Payment Delay (Days)</p>
+                        <small class="text-info">
+                            <i data-feather="clock" size="14"></i> Collection efficiency
+                        </small>
+                    </div>
+                    <div class="kpi-icon bg-info bg-opacity-10 text-info">
+                        <i data-feather="clock" size="32"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="glass-card p-4 kpi-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="fw-bold text-warning mb-1">{{ analytics_data.client_performance.top_clients|length if analytics_data.client_performance.top_clients else 0 }}</h3>
+                        <p class="text-muted mb-0 small">Active Clients</p>
+                        <small class="text-warning">
+                            <i data-feather="users" size="14"></i> Growing base
+                        </small>
+                    </div>
+                    <div class="kpi-icon bg-warning bg-opacity-10 text-warning">
+                        <i data-feather="users" size="32"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts Section -->
+    <div class="row mb-4">
+        <!-- Revenue Trends -->
+        <div class="col-lg-8 mb-4">
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Revenue & Profit Trends</h5>
+                    <div class="chart-legend">
+                        <span class="legend-item"><span class="legend-color bg-primary"></span> Revenue</span>
+                        <span class="legend-item"><span class="legend-color bg-success"></span> Profit</span>
+                    </div>
+                </div>
+                <canvas id="revenueProfitChart" height="400"></canvas>
+            </div>
+        </div>
+        
+        <!-- Payment Status Distribution -->
+        <div class="col-lg-4 mb-4">
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3">Payment Status</h5>
+                <canvas id="paymentStatusChart" height="400"></canvas>
+                
+                <div class="payment-status-details mt-3">
+                    {% if analytics_data.payment_analytics.payment_status_distribution %}
+                    {% for status in analytics_data.payment_analytics.payment_status_distribution %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="status-label">
+                            <span class="status-dot bg-{{ 'success' if status.status == 'Paid' else 'danger' if status.status == 'Unpaid' else 'warning' }}"></span>
+                            {{ status.status }}
+                        </span>
+                        <span class="fw-bold">₹{{ "%.0f"|format(status.amount) }}</span>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- AI Insights Section -->
+    {% if analytics_data.ai_predictions %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3">
+                    <i data-feather="cpu" class="me-2 text-primary"></i>
+                    AI-Powered Insights
+                </h5>
+                
+                <div class="row">
+                    <!-- Cash Flow Prediction -->
+                    <div class="col-lg-6 mb-3">
+                        <div class="ai-insight-card glass-card-sm p-3">
+                            <h6 class="text-primary mb-2">Cash Flow Prediction</h6>
+                            {% if analytics_data.ai_predictions.cash_flow %}
+                            <div class="prediction-summary">
+                                <p class="mb-2">
+                                    <strong>Next Month Forecast:</strong> 
+                                    ₹{{ "%.0f"|format(analytics_data.ai_predictions.cash_flow.summary.total_predicted_revenue or 0) }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Trend:</strong> 
+                                    <span class="badge bg-{{ 'success' if analytics_data.ai_predictions.cash_flow.summary.cash_flow_trend == 'improving' else 'warning' if analytics_data.ai_predictions.cash_flow.summary.cash_flow_trend == 'stable' else 'danger' }}">
+                                        {{ analytics_data.ai_predictions.cash_flow.summary.cash_flow_trend.title() }}
+                                    </span>
+                                </p>
+                                <canvas id="cashFlowPredictionChart" height="200"></canvas>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Behavior Analysis -->
+                    <div class="col-lg-6 mb-3">
+                        <div class="ai-insight-card glass-card-sm p-3">
+                            <h6 class="text-success mb-2">Payment Behavior Analysis</h6>
+                            {% if analytics_data.ai_predictions.payment_patterns %}
+                            <div class="behavior-analysis">
+                                <div class="mb-2">
+                                    <strong>Collection Health:</strong>
+                                    <span class="badge bg-success">{{ analytics_data.ai_predictions.payment_patterns.insights.overall_collection_health.title() }}</span>
+                                </div>
+                                
+                                {% if analytics_data.ai_predictions.payment_patterns.insights.best_performing_clients %}
+                                <div class="mb-2">
+                                    <strong>Top Performers:</strong>
+                                    <div class="client-list">
+                                        {% for client in analytics_data.ai_predictions.payment_patterns.insights.best_performing_clients[:3] %}
+                                        <span class="badge bg-success bg-opacity-10 text-success me-1">{{ client }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if analytics_data.ai_predictions.payment_patterns.insights.at_risk_clients %}
+                                <div class="mb-2">
+                                    <strong>Needs Attention:</strong>
+                                    <div class="client-list">
+                                        {% for client in analytics_data.ai_predictions.payment_patterns.insights.at_risk_clients[:3] %}
+                                        <span class="badge bg-warning bg-opacity-10 text-warning me-1">{{ client }}</span>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- AI Recommendations -->
+                <div class="ai-recommendations mt-3">
+                    <h6 class="text-info mb-2">Recommended Actions</h6>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="recommendation-item">
+                                <i data-feather="target" class="text-primary me-2"></i>
+                                <small>Focus on high-value client retention</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="recommendation-item">
+                                <i data-feather="clock" class="text-warning me-2"></i>
+                                <small>Implement automated reminders</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="recommendation-item">
+                                <i data-feather="trending-up" class="text-success me-2"></i>
+                                <small>Expand services to top clients</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Client Performance -->
+    <div class="row mb-4">
+        <div class="col-lg-8 mb-4">
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3">Top Performing Clients</h5>
+                
+                {% if analytics_data.client_performance.top_clients %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Client</th>
+                                <th>Revenue</th>
+                                <th>Invoices</th>
+                                <th>Avg. Value</th>
+                                <th>Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for client in analytics_data.client_performance.top_clients[:10] %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="client-avatar bg-primary bg-opacity-10 text-primary me-2">
+                                            {{ client.name[0].upper() }}
+                                        </div>
+                                        {{ client.name }}
+                                    </div>
+                                </td>
+                                <td class="fw-bold text-success">₹{{ "%.0f"|format(client.total_revenue) }}</td>
+                                <td>{{ client.invoice_count }}</td>
+                                <td>₹{{ "%.0f"|format(client.avg_invoice_value) }}</td>
+                                <td>
+                                    <div class="performance-bar">
+                                        <div class="performance-fill" style="width: {{ (client.total_revenue / analytics_data.client_performance.top_clients[0].total_revenue * 100) if analytics_data.client_performance.top_clients else 0 }}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-lg-4 mb-4">
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3">Client Distribution</h5>
+                <canvas id="clientTypeChart" height="300"></canvas>
+                
+                <div class="client-stats mt-3">
+                    {% if analytics_data.client_performance.client_types %}
+                    {% for type_data in analytics_data.client_performance.client_types %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="type-label">{{ type_data.type }}</span>
+                        <span class="badge bg-primary">{{ type_data.count }}</span>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Blockchain Analytics (if enabled) -->
+    {% if analytics_data.blockchain_insights %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3">
+                    <i data-feather="shield" class="me-2 text-info"></i>
+                    Blockchain Analytics
+                </h5>
+                
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="blockchain-stat text-center">
+                            <h3 class="text-info">{{ analytics_data.blockchain_insights.total_blocks or 0 }}</h3>
+                            <p class="text-muted small">Total Blocks</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="blockchain-stat text-center">
+                            <h3 class="text-success">{{ analytics_data.blockchain_insights.verified_invoices or 0 }}</h3>
+                            <p class="text-muted small">Verified Invoices</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="blockchain-stat text-center">
+                            <h3 class="text-primary">{{ analytics_data.blockchain_insights.total_transactions or 0 }}</h3>
+                            <p class="text-muted small">Transactions</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="blockchain-stat text-center">
+                            <span class="badge bg-{{ 'success' if analytics_data.blockchain_insights.chain_integrity else 'danger' }} p-2">
+                                <i data-feather="{{ 'shield-check' if analytics_data.blockchain_insights.chain_integrity else 'shield-off' }}" size="20"></i>
+                                {{ 'Secure' if analytics_data.blockchain_insights.chain_integrity else 'Error' }}
+                            </span>
+                            <p class="text-muted small mt-2">Chain Integrity</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Detailed Reports -->
+    <div class="row">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3">Generate Detailed Reports</h5>
+                
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="report-card glass-card-sm p-3 text-center">
+                            <i data-feather="file-text" size="32" class="text-primary mb-2"></i>
+                            <h6>Monthly Report</h6>
+                            <p class="small text-muted">Comprehensive monthly business summary</p>
+                            <button class="btn btn-outline-primary btn-sm" onclick="generateReport('monthly')">Generate</button>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="report-card glass-card-sm p-3 text-center">
+                            <i data-feather="users" size="32" class="text-success mb-2"></i>
+                            <h6>Client Analysis</h6>
+                            <p class="small text-muted">Detailed client performance metrics</p>
+                            <button class="btn btn-outline-success btn-sm" onclick="generateReport('clients')">Generate</button>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="report-card glass-card-sm p-3 text-center">
+                            <i data-feather="dollar-sign" size="32" class="text-warning mb-2"></i>
+                            <h6>Financial Report</h6>
+                            <p class="small text-muted">Revenue, profit, and tax analysis</p>
+                            <button class="btn btn-outline-warning btn-sm" onclick="generateReport('financial')">Generate</button>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-3">
+                        <div class="report-card glass-card-sm p-3 text-center">
+                            <i data-feather="cpu" size="32" class="text-info mb-2"></i>
+                            <h6>AI Insights</h6>
+                            <p class="small text-muted">Machine learning predictions</p>
+                            <button class="btn btn-outline-info btn-sm" onclick="generateReport('ai')">Generate</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeCharts();
+    
+    // KPI card animations
+    const kpiCards = document.querySelectorAll('.kpi-card');
+    kpiCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('animate-slide-up');
+    });
+});
+
+function initializeCharts() {
+    // Revenue & Profit Trends Chart
+    const revenueProfitCtx = document.getElementById('revenueProfitChart').getContext('2d');
+    const revenueData = {{ analytics_data.revenue_trends.monthly_data | tojson if analytics_data.revenue_trends else [] }};
+    const profitData = {{ analytics_data.profitability_analysis.monthly_trends | tojson if analytics_data.profitability_analysis else [] }};
+    
+    new Chart(revenueProfitCtx, {
+        type: 'line',
+        data: {
+            labels: revenueData.map(item => item.month || ''),
+            datasets: [{
+                label: 'Revenue',
+                data: revenueData.map(item => item.revenue || 0),
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }, {
+                label: 'Profit',
+                data: profitData.map(item => item.profit || 0),
+                borderColor: 'rgb(34, 197, 94)',
+                backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString();
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+    
+    // Payment Status Chart
+    const paymentStatusCtx = document.getElementById('paymentStatusChart').getContext('2d');
+    const paymentData = {{ analytics_data.payment_analytics.payment_status_distribution | tojson if analytics_data.payment_analytics else [] }};
+    
+    new Chart(paymentStatusCtx, {
+        type: 'doughnut',
+        data: {
+            labels: paymentData.map(item => item.status),
+            datasets: [{
+                data: paymentData.map(item => item.amount),
+                backgroundColor: [
+                    'rgba(34, 197, 94, 0.8)',   // Paid - Green
+                    'rgba(239, 68, 68, 0.8)',   // Unpaid - Red
+                    'rgba(245, 158, 11, 0.8)'   // Partially Paid - Yellow
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+    
+    // Client Type Distribution Chart
+    const clientTypeCtx = document.getElementById('clientTypeChart').getContext('2d');
+    const clientTypeData = {{ analytics_data.client_performance.client_types | tojson if analytics_data.client_performance else [] }};
+    
+    new Chart(clientTypeCtx, {
+        type: 'pie',
+        data: {
+            labels: clientTypeData.map(item => item.type),
+            datasets: [{
+                data: clientTypeData.map(item => item.count),
+                backgroundColor: [
+                    'rgba(59, 130, 246, 0.8)',   // Primary
+                    'rgba(34, 197, 94, 0.8)',    // Success
+                    'rgba(245, 158, 11, 0.8)',   // Warning
+                    'rgba(139, 92, 246, 0.8)'    // Purple
+                ],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+    
+    // Cash Flow Prediction Chart (if AI data available)
+    {% if analytics_data.ai_predictions and analytics_data.ai_predictions.cash_flow %}
+    const cashFlowCtx = document.getElementById('cashFlowPredictionChart').getContext('2d');
+    const predictionData = {{ analytics_data.ai_predictions.cash_flow.monthly_predictions | tojson }};
+    
+    new Chart(cashFlowCtx, {
+        type: 'bar',
+        data: {
+            labels: predictionData.map(item => item.month),
+            datasets: [{
+                label: 'Predicted Revenue',
+                data: predictionData.map(item => item.predicted_revenue),
+                backgroundColor: 'rgba(59, 130, 246, 0.6)',
+                borderColor: 'rgb(59, 130, 246)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+    {% endif %}
+}
+
+function exportAnalyticsReport() {
+    // Create a loading state
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Generating...';
+    btn.disabled = true;
+    
+    // Simulate report generation
+    setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        
+        // In a real application, this would trigger a download
+        alert('Analytics report generated successfully!');
+    }, 2000);
+}
+
+function generateReport(type) {
+    const reportTypes = {
+        'monthly': 'Monthly Business Report',
+        'clients': 'Client Analysis Report',
+        'financial': 'Financial Summary Report',
+        'ai': 'AI Insights Report'
+    };
+    
+    alert(`Generating ${reportTypes[type]}...`);
+    
+    // In a real application, this would make an API call to generate the report
+    // window.location.href = `/api/reports/${type}?format=pdf`;
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-up {
+    animation: slideUp 0.6s ease-out forwards;
+}
+
+.kpi-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.kpi-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-legend {
+    display: flex;
+    gap: 15px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    margin-right: 6px;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+.client-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.performance-bar {
+    width: 100px;
+    height: 6px;
+    background: #e9ecef;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.performance-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #059669);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.ai-insight-card {
+    transition: transform 0.2s ease;
+}
+
+.ai-insight-card:hover {
+    transform: translateY(-2px);
+}
+
+.recommendation-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.report-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.report-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.blockchain-stat {
+    padding: 15px;
+}
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

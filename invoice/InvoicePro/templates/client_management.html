@@ -1,0 +1,607 @@
+{% extends "base.html" %}
+
+{% block title %}Client Management - Revolutionary Invoice System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h1 class="display-6 fw-bold text-primary mb-1">
+                            <i data-feather="users" class="me-2"></i>
+                            Client Management
+                        </h1>
+                        <p class="text-muted mb-0">Manage your clients with AI-powered insights and CRM features</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="{{ url_for('create_client') }}" class="btn btn-primary glass-btn-primary">
+                                <i data-feather="user-plus" class="me-1"></i> New Client
+                            </a>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary glass-btn dropdown-toggle" data-bs-toggle="dropdown">
+                                    <i data-feather="download" class="me-1"></i> Export
+                                </button>
+                                <ul class="dropdown-menu glass-dropdown">
+                                    <li><a class="dropdown-item" href="#" onclick="exportClientsToExcel()">
+                                        <i data-feather="file-text" class="me-2"></i> Excel
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="#" onclick="exportClientsToPDF()">
+                                        <i data-feather="file" class="me-2"></i> PDF Report
+                                    </a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Client Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="glass-card p-4 metric-card">
+                <div class="d-flex align-items-center">
+                    <div class="metric-icon bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
+                        <i data-feather="users" size="24"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">{{ clients.total if clients.pages else clients|length }}</h3>
+                        <p class="text-muted mb-0 small">Total Clients</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="glass-card p-4 metric-card">
+                <div class="d-flex align-items-center">
+                    <div class="metric-icon bg-success bg-opacity-10 text-success rounded-circle p-3 me-3">
+                        <i data-feather="trending-up" size="24"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">{{ client_insights.values()|map(attribute='predicted_ltv')|select('greaterthan', 0)|list|length if client_insights else 0 }}</h3>
+                        <p class="text-muted mb-0 small">High Value Clients</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="glass-card p-4 metric-card">
+                <div class="d-flex align-items-center">
+                    <div class="metric-icon bg-warning bg-opacity-10 text-warning rounded-circle p-3 me-3">
+                        <i data-feather="alert-triangle" size="24"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">{{ client_insights.values()|selectattr('risk_level', 'equalto', 'High')|list|length if client_insights else 0 }}</h3>
+                        <p class="text-muted mb-0 small">High Risk</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="glass-card p-4 metric-card">
+                <div class="d-flex align-items-center">
+                    <div class="metric-icon bg-info bg-opacity-10 text-info rounded-circle p-3 me-3">
+                        <i data-feather="user-check" size="24"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-0">{{ clients.items|selectattr('blockchain_verified', 'equalto', True)|list|length if clients.items else 0 }}</h3>
+                        <p class="text-muted mb-0 small">Verified</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Search and Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <form method="GET" class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label for="search" class="form-label">Search Clients</label>
+                        <div class="input-group">
+                            <span class="input-group-text glass-input-addon">
+                                <i data-feather="search" size="16"></i>
+                            </span>
+                            <input type="text" class="form-control glass-input" id="search" name="search" 
+                                   value="{{ search }}" placeholder="Name, email, phone...">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label for="type" class="form-label">Client Type</label>
+                        <select class="form-select glass-input" id="type" name="type">
+                            <option value="">All Types</option>
+                            <option value="Regular" {% if client_type == 'Regular' %}selected{% endif %}>Regular</option>
+                            <option value="Premium" {% if client_type == 'Premium' %}selected{% endif %}>Premium</option>
+                            <option value="VIP" {% if client_type == 'VIP' %}selected{% endif %}>VIP</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label for="lead_stage" class="form-label">Lead Stage</label>
+                        <select class="form-select glass-input" id="lead_stage" name="lead_stage">
+                            <option value="">All Stages</option>
+                            <option value="New">New</option>
+                            <option value="In Discussion">In Discussion</option>
+                            <option value="Quoted">Quoted</option>
+                            <option value="Closed">Closed</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label for="risk_level" class="form-label">Risk Level</label>
+                        <select class="form-select glass-input" id="risk_level" name="risk_level">
+                            <option value="">All Levels</option>
+                            <option value="Low">Low Risk</option>
+                            <option value="Medium">Medium Risk</option>
+                            <option value="High">High Risk</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary glass-btn" title="Filter">
+                                <i data-feather="filter" size="16"></i>
+                            </button>
+                            <a href="{{ url_for('client_management') }}" class="btn btn-outline-secondary glass-btn" title="Clear">
+                                <i data-feather="x" size="16"></i>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Client List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                {% if clients.items if clients.pages else clients %}
+                
+                <!-- View Toggle -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="btn-group" role="group">
+                        <input type="radio" class="btn-check" name="viewMode" id="gridView" checked>
+                        <label class="btn btn-outline-primary btn-sm" for="gridView">
+                            <i data-feather="grid" size="16"></i> Grid
+                        </label>
+                        
+                        <input type="radio" class="btn-check" name="viewMode" id="listView">
+                        <label class="btn btn-outline-primary btn-sm" for="listView">
+                            <i data-feather="list" size="16"></i> List
+                        </label>
+                    </div>
+                    
+                    <div class="text-muted small">
+                        Showing {{ clients.items|length if clients.pages else clients|length }} clients
+                    </div>
+                </div>
+                
+                <!-- Grid View -->
+                <div id="gridViewContainer" class="row">
+                    {% for client in clients.items if clients.pages else clients %}
+                    <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                        <div class="client-card glass-card p-4 h-100">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="client-avatar">
+                                    <div class="avatar-circle bg-primary bg-opacity-10 text-primary">
+                                        {{ client.name[0].upper() }}
+                                    </div>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                        <i data-feather="more-horizontal" size="14"></i>
+                                    </button>
+                                    <ul class="dropdown-menu glass-dropdown">
+                                        <li><a class="dropdown-item" href="#">
+                                            <i data-feather="edit" size="14" class="me-2"></i> Edit
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="{{ url_for('create_invoice') }}?client_id={{ client.id }}">
+                                            <i data-feather="file-plus" size="14" class="me-2"></i> Create Invoice
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="#">
+                                            <i data-feather="mail" size="14" class="me-2"></i> Send Email
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="#">
+                                            <i data-feather="trash" size="14" class="me-2"></i> Delete
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="client-info">
+                                <h6 class="fw-bold mb-1">{{ client.name }}</h6>
+                                <p class="text-muted small mb-2">{{ client.contact_person or client.email }}</p>
+                                
+                                <div class="client-badges mb-3">
+                                    <span class="badge bg-{{ 'primary' if client.client_type == 'Premium' else 'secondary' if client.client_type == 'VIP' else 'light' }} text-{{ 'white' if client.client_type in ['Premium', 'VIP'] else 'dark' }}">
+                                        {{ client.client_type }}
+                                    </span>
+                                    
+                                    {% if client_insights and client.id in client_insights %}
+                                    <span class="badge bg-{{ 'danger' if client_insights[client.id].risk_level == 'High' else 'warning' if client_insights[client.id].risk_level == 'Medium' else 'success' }} bg-opacity-10 
+                                                 text-{{ 'danger' if client_insights[client.id].risk_level == 'High' else 'warning' if client_insights[client.id].risk_level == 'Medium' else 'success' }}">
+                                        {{ client_insights[client.id].risk_level }} Risk
+                                    </span>
+                                    {% endif %}
+                                    
+                                    {% if client.blockchain_verified %}
+                                    <span class="badge bg-dark bg-opacity-10 text-dark">
+                                        <i data-feather="shield" size="12"></i> Verified
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="client-stats small">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-muted">Total Business:</span>
+                                        <span class="fw-medium">₹{{ "%.0f"|format(client.total_business) }}</span>
+                                    </div>
+                                    
+                                    {% if client_insights and client.id in client_insights %}
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <span class="text-muted">Predicted LTV:</span>
+                                        <span class="fw-medium text-success">₹{{ "%.0f"|format(client_insights[client.id].predicted_ltv) }}</span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Lead Stage:</span>
+                                        <span class="badge bg-info bg-opacity-10 text-info">{{ client.lead_stage }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="client-actions mt-3 pt-3 border-top">
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-primary glass-btn flex-fill" onclick="window.location.href='{{ url_for('create_invoice') }}?client_id={{ client.id }}'">
+                                        <i data-feather="file-plus" size="14"></i> Invoice
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary glass-btn" onclick="viewClientDetails({{ client.id }})">
+                                        <i data-feather="eye" size="14"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-info glass-btn" onclick="contactClient({{ client.id }})">
+                                        <i data-feather="phone" size="14"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- List View (Hidden by default) -->
+                <div id="listViewContainer" style="display: none;">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Client</th>
+                                    <th>Contact</th>
+                                    <th>Type</th>
+                                    <th>Lead Stage</th>
+                                    <th>Total Business</th>
+                                    <th>AI Insights</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for client in clients.items if clients.pages else clients %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-circle bg-primary bg-opacity-10 text-primary me-3">
+                                                {{ client.name[0].upper() }}
+                                            </div>
+                                            <div>
+                                                <div class="fw-medium">{{ client.name }}</div>
+                                                <small class="text-muted">{{ client.contact_person }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            {% if client.email %}<div><i data-feather="mail" size="14" class="me-1"></i>{{ client.email }}</div>{% endif %}
+                                            {% if client.phone %}<div><i data-feather="phone" size="14" class="me-1"></i>{{ client.phone }}</div>{% endif %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-{{ 'primary' if client.client_type == 'Premium' else 'secondary' if client.client_type == 'VIP' else 'light' }} text-{{ 'white' if client.client_type in ['Premium', 'VIP'] else 'dark' }}">
+                                            {{ client.client_type }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info bg-opacity-10 text-info">{{ client.lead_stage }}</span>
+                                    </td>
+                                    <td>₹{{ "%.2f"|format(client.total_business) }}</td>
+                                    <td>
+                                        {% if client_insights and client.id in client_insights %}
+                                        <div class="small">
+                                            <div class="text-{{ 'danger' if client_insights[client.id].risk_level == 'High' else 'warning' if client_insights[client.id].risk_level == 'Medium' else 'success' }}">
+                                                {{ client_insights[client.id].risk_level }} Risk
+                                            </div>
+                                            <div class="text-muted">LTV: ₹{{ "%.0f"|format(client_insights[client.id].predicted_ltv) }}</div>
+                                        </div>
+                                        {% else %}
+                                        <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{{ url_for('create_invoice') }}?client_id={{ client.id }}" class="btn btn-outline-primary" title="Create Invoice">
+                                                <i data-feather="file-plus" size="14"></i>
+                                            </a>
+                                            <button class="btn btn-outline-secondary" onclick="viewClientDetails({{ client.id }})" title="View Details">
+                                                <i data-feather="eye" size="14"></i>
+                                            </button>
+                                            <button class="btn btn-outline-info" onclick="contactClient({{ client.id }})" title="Contact">
+                                                <i data-feather="phone" size="14"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                {% if clients.pages and clients.pages > 1 %}
+                <nav aria-label="Client pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item {% if not clients.has_prev %}disabled{% endif %}">
+                            <a class="page-link glass-btn" href="{{ url_for('client_management', page=clients.prev_num, search=search, type=client_type) }}">
+                                <i data-feather="chevron-left" size="16"></i>
+                            </a>
+                        </li>
+                        
+                        {% for page_num in clients.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                            {% if page_num %}
+                                {% if page_num != clients.page %}
+                                <li class="page-item">
+                                    <a class="page-link glass-btn" href="{{ url_for('client_management', page=page_num, search=search, type=client_type) }}">
+                                        {{ page_num }}
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="page-item active">
+                                    <span class="page-link bg-primary border-primary">{{ page_num }}</span>
+                                </li>
+                                {% endif %}
+                            {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">...</span>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <li class="page-item {% if not clients.has_next %}disabled{% endif %}">
+                            <a class="page-link glass-btn" href="{{ url_for('client_management', page=clients.next_num, search=search, type=client_type) }}">
+                                <i data-feather="chevron-right" size="16"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                {% endif %}
+                
+                {% else %}
+                <!-- Empty State -->
+                <div class="text-center py-5">
+                    <i data-feather="users" size="64" class="text-muted mb-3"></i>
+                    <h4 class="text-muted">No clients found</h4>
+                    <p class="text-muted mb-4">
+                        {% if search or client_type %}
+                        Try adjusting your filters or add a new client.
+                        {% else %}
+                        Start by adding your first client to manage relationships and create invoices.
+                        {% endif %}
+                    </p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a href="{{ url_for('create_client') }}" class="btn btn-primary glass-btn-primary">
+                            <i data-feather="user-plus" class="me-1"></i> Add First Client
+                        </a>
+                        {% if search or client_type %}
+                        <a href="{{ url_for('client_management') }}" class="btn btn-outline-secondary glass-btn">
+                            <i data-feather="x" class="me-1"></i> Clear Filters
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Client Details Modal -->
+<div class="modal fade" id="clientDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content glass-modal">
+            <div class="modal-header border-0">
+                <h5 class="modal-title">Client Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="clientDetailsContent">
+                <!-- Content loaded dynamically -->
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // View mode toggle
+    const gridViewRadio = document.getElementById('gridView');
+    const listViewRadio = document.getElementById('listView');
+    const gridContainer = document.getElementById('gridViewContainer');
+    const listContainer = document.getElementById('listViewContainer');
+    
+    gridViewRadio.addEventListener('change', function() {
+        if (this.checked) {
+            gridContainer.style.display = 'block';
+            listContainer.style.display = 'none';
+        }
+    });
+    
+    listViewRadio.addEventListener('change', function() {
+        if (this.checked) {
+            gridContainer.style.display = 'none';
+            listContainer.style.display = 'block';
+            feather.replace();
+        }
+    });
+    
+    // Client card hover effects
+    const clientCards = document.querySelectorAll('.client-card');
+    clientCards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.transition = 'transform 0.3s ease';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
+
+function viewClientDetails(clientId) {
+    // Show loading state
+    const modal = new bootstrap.Modal(document.getElementById('clientDetailsModal'));
+    const content = document.getElementById('clientDetailsContent');
+    
+    content.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-primary"></div>
+            <p class="mt-2 text-muted">Loading client details...</p>
+        </div>
+    `;
+    
+    modal.show();
+    
+    // In a real application, this would fetch client details via API
+    setTimeout(() => {
+        content.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="fw-bold">Contact Information</h6>
+                    <p><strong>Email:</strong> client@example.com</p>
+                    <p><strong>Phone:</strong> +91-9876543210</p>
+                    <p><strong>Address:</strong> 123 Business Street, City</p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="fw-bold">Business Details</h6>
+                    <p><strong>GSTIN:</strong> 33AAAAA0000A1Z5</p>
+                    <p><strong>PAN:</strong> AAAAA0000A</p>
+                    <p><strong>Total Business:</strong> ₹2,50,000</p>
+                </div>
+            </div>
+            <hr>
+            <h6 class="fw-bold">Recent Activity</h6>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker bg-success"></div>
+                    <div class="timeline-content">
+                        <p class="mb-1">Payment received for Invoice #INV-001</p>
+                        <small class="text-muted">2 days ago</small>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-marker bg-primary"></div>
+                    <div class="timeline-content">
+                        <p class="mb-1">New invoice created</p>
+                        <small class="text-muted">1 week ago</small>
+                    </div>
+                </div>
+            </div>
+        `;
+    }, 1000);
+}
+
+function contactClient(clientId) {
+    // Implement contact functionality
+    alert('Contact client functionality - could open email client or show contact options');
+}
+
+function exportClientsToExcel() {
+    window.location.href = '/api/export/clients/excel?' + new URLSearchParams(window.location.search);
+}
+
+function exportClientsToPDF() {
+    window.location.href = '/api/export/clients/pdf?' + new URLSearchParams(window.location.search);
+}
+</script>
+
+<style>
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.client-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.client-card:hover {
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -35px;
+    top: 5px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: -30px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.metric-card {
+    transition: transform 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-3px);
+}
+</style>
+{% endblock %}

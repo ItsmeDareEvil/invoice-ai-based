@@ -1,0 +1,480 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Revolutionary Invoice System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Welcome Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="display-6 fw-bold text-primary mb-2">
+                            <i data-feather="zap" class="me-2"></i>
+                            Welcome back, {{ session.username }}!
+                        </h1>
+                        <p class="lead text-muted mb-0">
+                            {{ today.strftime('%A, %B %d, %Y') }} • 
+                            {% if ai_enabled %}AI-Powered Dashboard{% endif %}
+                            {% if blockchain_enabled %} • Blockchain Secured{% endif %}
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="{{ url_for('create_invoice') }}" class="btn btn-primary glass-btn-primary">
+                                <i data-feather="plus" class="me-1"></i> New Invoice
+                            </a>
+                            <a href="{{ url_for('create_client') }}" class="btn btn-outline-primary glass-btn">
+                                <i data-feather="user-plus" class="me-1"></i> New Client
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Key Metrics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="glass-card p-4 metric-card">
+                <div class="d-flex align-items-center">
+                    <div class="metric-icon bg-success bg-opacity-10 text-success rounded-circle p-3 me-3">
+                        <i data-feather="dollar-sign" size="24"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted mb-1 small">Total Revenue</p>
+                        <h3 class="fw-bold mb-0">₹{{ "%.2f"|format(total_revenue) }}</h3>
+                        <small class="text-success">
+                            <i data-feather="trending-up" size="14"></i> +12.5% this month
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="glass-card p-4 metric-card">
+                <div class="d-flex align-items-center">
+                    <div class="metric-icon bg-warning bg-opacity-10 text-warning rounded-circle p-3 me-3">
+                        <i data-feather="clock" size="24"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted mb-1 small">Outstanding</p>
+                        <h3 class="fw-bold mb-0">₹{{ "%.2f"|format(outstanding_amount) }}</h3>
+                        <small class="text-warning">
+                            <i data-feather="alert-circle" size="14"></i> Needs attention
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="glass-card p-4 metric-card">
+                <div class="d-flex align-items-center">
+                    <div class="metric-icon bg-info bg-opacity-10 text-info rounded-circle p-3 me-3">
+                        <i data-feather="file-text" size="24"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted mb-1 small">Total Invoices</p>
+                        <h3 class="fw-bold mb-0">{{ total_invoices }}</h3>
+                        <small class="text-info">
+                            <i data-feather="file" size="14"></i> {{ recent_invoices|length }} recent
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="glass-card p-4 metric-card">
+                <div class="d-flex align-items-center">
+                    <div class="metric-icon bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
+                        <i data-feather="users" size="24"></i>
+                    </div>
+                    <div>
+                        <p class="text-muted mb-1 small">Active Clients</p>
+                        <h3 class="fw-bold mb-0">{{ total_clients }}</h3>
+                        <small class="text-primary">
+                            <i data-feather="user-check" size="14"></i> All verified
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+   <!-- Charts and Analytics -->
+<div class="row mb-4 align-items-stretch">
+    <!-- Revenue Chart (Left Column) -->
+    <div class="col-lg-8">
+        <div class="glass-card p-4 h-100" style="max-height: 460px; overflow-y: auto;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">Revenue Trends</h5>
+                <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" name="revenueRange" id="revenue6m" value="6m" checked>
+                    <label class="btn btn-outline-primary btn-sm" for="revenue6m">6M</label>
+
+                    <input type="radio" class="btn-check" name="revenueRange" id="revenue12m" value="12m">
+                    <label class="btn btn-outline-primary btn-sm" for="revenue12m">12M</label>
+                </div>
+            </div>
+            <!-- Chart Canvas with fixed height -->
+            <div style="height: 260px;">
+                <canvas id="revenueChart" height="260"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions (Right Column) -->
+    <div class="col-lg-4">
+        <div class="glass-card p-4 h-100" style="max-height: 460px; overflow-y: auto;">
+            <h5 class="fw-bold mb-3">Quick Actions</h5>
+            <div class="d-grid gap-2">
+                <button class="btn btn-outline-primary glass-btn text-start" onclick="window.location.href='{{ url_for('create_invoice') }}'">
+                    <i data-feather="file-plus" class="me-2"></i> Create New Invoice
+                </button>
+                {% if ai_enabled %}
+                <button class="btn btn-outline-success glass-btn text-start" id="voiceInvoiceBtn">
+                    <i data-feather="mic" class="me-2"></i> Voice Create Invoice
+                </button>
+                <button class="btn btn-outline-info glass-btn text-start" data-bs-toggle="modal" data-bs-target="#documentScannerModal">
+                    <i data-feather="camera" class="me-2"></i> Scan Document
+                </button>
+                {% endif %}
+                <button class="btn btn-outline-warning glass-btn text-start" onclick="window.location.href='{{ url_for('analytics') }}'">
+                    <i data-feather="trending-up" class="me-2"></i> View Analytics
+                </button>
+                {% if blockchain_enabled %}
+                <button class="btn btn-outline-dark glass-btn text-start" id="blockchainStatsBtn">
+                    <i data-feather="shield" class="me-2"></i> Blockchain Status
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+    
+    <!-- Recent Activity and AI Insights -->
+    <div class="row mb-4">
+        <div class="col-lg-6">
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Recent Invoices</h5>
+                    <a href="{{ url_for('invoice_management') }}" class="btn btn-sm btn-outline-primary">
+                        View All <i data-feather="arrow-right" size="14"></i>
+                    </a>
+                </div>
+                
+                {% if recent_invoices %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Client</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for invoice in recent_invoices %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('invoice_detail', id=invoice.id) }}" class="text-decoration-none">
+                                        {{ invoice.invoice_number }}
+                                    </a>
+                                    {% if invoice.ai_generated %}
+                                    <span class="badge bg-success bg-opacity-10 text-success ms-1">AI</span>
+                                    {% endif %}
+                                    {% if invoice.voice_command_created %}
+                                    <span class="badge bg-info bg-opacity-10 text-info ms-1">Voice</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ invoice.client.name }}</td>
+                                <td>₹{{ "%.2f"|format(invoice.total_amount) }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if invoice.payment_status == 'Paid' %}bg-success{% 
+                                        elif invoice.payment_status == 'Unpaid' %}bg-danger{% 
+                                        else %}bg-warning{% endif %}">
+                                        {{ invoice.payment_status }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{{ url_for('invoice_detail', id=invoice.id) }}" class="btn btn-outline-primary btn-sm">
+                                            <i data-feather="eye" size="14"></i>
+                                        </a>
+                                        <a href="{{ url_for('invoice_pdf', id=invoice.id) }}" class="btn btn-outline-secondary btn-sm">
+                                            <i data-feather="download" size="14"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i data-feather="file-text" size="48" class="text-muted mb-3"></i>
+                    <p class="text-muted">No recent invoices found.</p>
+                    <a href="{{ url_for('create_invoice') }}" class="btn btn-primary">Create Your First Invoice</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3">
+                    {% if ai_enabled %}
+                    <i data-feather="cpu" class="me-2 text-primary"></i>AI Insights
+                    {% else %}
+                    <i data-feather="alert-circle" class="me-2 text-warning"></i>Upcoming Payments
+                    {% endif %}
+                </h5>
+                
+                {% if ai_enabled and ai_insights %}
+                <!-- AI-powered insights -->
+                <div class="ai-insights">
+                    {% if ai_insights.cash_flow %}
+                    <div class="insight-card glass-card-sm p-3 mb-3">
+                        <h6 class="text-primary mb-2">Cash Flow Prediction</h6>
+                        <p class="small mb-1">
+                            Expected revenue next month: 
+                            <strong>₹{{ ai_insights.cash_flow.summary.total_predicted_revenue or 0 }}</strong>
+                        </p>
+                        <p class="small text-muted mb-0">
+                            Trend: {{ ai_insights.cash_flow.summary.cash_flow_trend or 'Stable' }}
+                        </p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if ai_insights.payment_patterns %}
+                    <div class="insight-card glass-card-sm p-3 mb-3">
+                        <h6 class="text-success mb-2">Payment Analysis</h6>
+                        <p class="small mb-1">
+                            Collection health: 
+                            <strong>{{ ai_insights.payment_patterns.insights.overall_collection_health or 'Good' }}</strong>
+                        </p>
+                        {% if ai_insights.payment_patterns.insights.at_risk_clients %}
+                        <p class="small text-warning mb-0">
+                            <i data-feather="alert-triangle" size="14"></i>
+                            {{ ai_insights.payment_patterns.insights.at_risk_clients|length }} clients need attention
+                        </p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <!-- Upcoming payments fallback -->
+                {% if upcoming_payments %}
+                <div class="list-group list-group-flush">
+                    {% for payment in upcoming_payments %}
+                    <div class="list-group-item border-0 px-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ payment.client.name }}</h6>
+                                <p class="mb-1 small text-muted">{{ payment.invoice_number }}</p>
+                                <small class="text-muted">Due: {{ payment.due_date.strftime('%d %b %Y') if payment.due_date else 'No due date' }}</small>
+                            </div>
+                            <div class="text-end">
+                                <span class="fw-bold">₹{{ "%.2f"|format(payment.total_amount) }}</span>
+                                {% if payment.due_date and payment.due_date < today.date() %}
+                                <br><small class="text-danger">Overdue</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i data-feather="check-circle" size="48" class="text-success mb-3"></i>
+                    <p class="text-muted">All caught up! No upcoming payments.</p>
+                </div>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Blockchain Status (if enabled) -->
+    {% if blockchain_enabled and blockchain_stats %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <h5 class="fw-bold mb-3">
+                    <i data-feather="shield" class="me-2 text-info"></i>
+                    Blockchain Status
+                </h5>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h4 class="text-info">{{ blockchain_stats.total_blocks or 0 }}</h4>
+                            <small class="text-muted">Total Blocks</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h4 class="text-success">{{ blockchain_stats.verified_invoices or 0 }}</h4>
+                            <small class="text-muted">Verified Invoices</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h4 class="text-primary">{{ blockchain_stats.total_transactions or 0 }}</h4>
+                            <small class="text-muted">Transactions</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <span class="badge bg-{{ 'success' if blockchain_stats.chain_integrity else 'danger' }} p-2">
+                                <i data-feather="{{ 'check' if blockchain_stats.chain_integrity else 'x' }}" size="16"></i>
+                                {{ 'Secure' if blockchain_stats.chain_integrity else 'Error' }}
+                            </span>
+                            <br><small class="text-muted">Chain Integrity</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize revenue chart
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    const revenueData = {{ monthly_revenue | tojson }};
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: revenueData.map(item => item.month),
+            datasets: [{
+                label: 'Revenue',
+                data: revenueData.map(item => item.revenue),
+                borderColor: 'rgb(59, 130, 246)',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: 'rgb(59, 130, 246)',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value.toLocaleString();
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            },
+            elements: {
+                point: {
+                    hoverRadius: 8
+                }
+            }
+        }
+    });
+    
+    // Metric cards animation
+    const metricCards = document.querySelectorAll('.metric-card');
+    metricCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('animate-slide-up');
+    });
+    
+    // Voice invoice button
+    {% if ai_enabled %}
+    const voiceInvoiceBtn = document.getElementById('voiceInvoiceBtn');
+    if (voiceInvoiceBtn) {
+        voiceInvoiceBtn.addEventListener('click', function() {
+            // Trigger voice command modal
+            const modal = new bootstrap.Modal(document.getElementById('voiceCommandModal'));
+            modal.show();
+        });
+    }
+    {% endif %}
+    
+    // Blockchain stats button
+    {% if blockchain_enabled %}
+    const blockchainStatsBtn = document.getElementById('blockchainStatsBtn');
+    if (blockchainStatsBtn) {
+        blockchainStatsBtn.addEventListener('click', function() {
+            // Show detailed blockchain information
+            alert('Blockchain verification active. All invoices are secured with cryptographic hashes.');
+        });
+    }
+    {% endif %}
+});
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-slide-up {
+    animation: slideUp 0.6s ease-out forwards;
+}
+
+.metric-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.insight-card {
+    transition: transform 0.2s ease;
+}
+
+.insight-card:hover {
+    transform: translateX(5px);
+}
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Server Error - Revolutionary Invoice System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card glass-card text-center">
+                <div class="card-body py-5">
+                    <div class="mb-4">
+                        <i data-feather="alert-triangle" class="text-danger" style="width: 64px; height: 64px;"></i>
+                    </div>
+                    <h1 class="display-1 fw-bold text-danger">500</h1>
+                    <h3 class="mb-3">Internal Server Error</h3>
+                    <p class="text-muted mb-4">
+                        Something went wrong on our end. We're working to fix it.
+                    </p>
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-primary">
+                            <i data-feather="home" class="me-2"></i>
+                            Go to Dashboard
+                        </a>
+                        <button onclick="location.reload()" class="btn btn-outline-secondary">
+                            <i data-feather="refresh-cw" class="me-2"></i>
+                            Try Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize Feather icons
+    feather.replace();
+</script>
+{% endblock %}

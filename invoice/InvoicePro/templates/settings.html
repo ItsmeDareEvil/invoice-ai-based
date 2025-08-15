@@ -1,0 +1,1237 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Revolutionary Invoice System{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="display-6 fw-bold text-primary mb-1">
+                            <i data-feather="settings" class="me-2"></i>
+                            System Settings
+                        </h1>
+                        <p class="text-muted mb-0">Configure your revolutionary invoice system and AI features</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="d-flex gap-2 justify-content-end">
+                            <button class="btn btn-success glass-btn" id="saveAllSettings">
+                                <i data-feather="save" class="me-1"></i> Save All Changes
+                            </button>
+                            <button class="btn btn-outline-secondary glass-btn" id="resetSettings">
+                                <i data-feather="refresh-cw" class="me-1"></i> Reset to Defaults
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Navigation -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="glass-card p-3">
+                <ul class="nav nav-pills nav-fill settings-nav" id="settingsNav">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#company" data-bs-toggle="pill">
+                            <i data-feather="building" class="me-1"></i> Company
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#user" data-bs-toggle="pill">
+                            <i data-feather="user" class="me-1"></i> User Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#ai" data-bs-toggle="pill">
+                            <i data-feather="cpu" class="me-1"></i> AI Settings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#blockchain" data-bs-toggle="pill">
+                            <i data-feather="shield" class="me-1"></i> Blockchain
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#invoice" data-bs-toggle="pill">
+                            <i data-feather="file-text" class="me-1"></i> Invoice
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#notifications" data-bs-toggle="pill">
+                            <i data-feather="bell" class="me-1"></i> Notifications
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#security" data-bs-toggle="pill">
+                            <i data-feather="lock" class="me-1"></i> Security
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Settings Content -->
+    <div class="row">
+        <div class="col-12">
+            <div class="tab-content">
+                <!-- Company Settings -->
+                <div class="tab-pane fade show active" id="company">
+                    <div class="glass-card p-4">
+                        <h5 class="fw-bold mb-4">
+                            <i data-feather="building" class="me-2 text-primary"></i>
+                            Company Information
+                        </h5>
+                        
+                        <form id="companyForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="companyName" class="form-label">Company Name *</label>
+                                        <input type="text" class="form-control glass-input" id="companyName" 
+                                               value="{{ settings_data.company.name if settings_data.company else '' }}" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="companyEmail" class="form-label">Email Address *</label>
+                                        <input type="email" class="form-control glass-input" id="companyEmail" 
+                                               value="{{ settings_data.company.email if settings_data.company else '' }}" required>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="companyPhone" class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control glass-input" id="companyPhone" 
+                                               value="{{ settings_data.company.phone if settings_data.company else '' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="companyWebsite" class="form-label">Website</label>
+                                        <input type="url" class="form-control glass-input" id="companyWebsite" 
+                                               value="{{ settings_data.company.website if settings_data.company else '' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="companyAddress" class="form-label">Address</label>
+                                <textarea class="form-control glass-input" id="companyAddress" rows="3">{{ settings_data.company.address if settings_data.company else '' }}</textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="companyCity" class="form-label">City</label>
+                                        <input type="text" class="form-control glass-input" id="companyCity" 
+                                               value="{{ settings_data.company.city if settings_data.company else '' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="companyState" class="form-label">State</label>
+                                        <input type="text" class="form-control glass-input" id="companyState" 
+                                               value="{{ settings_data.company.state if settings_data.company else '' }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="mb-3">
+                                        <label for="companyPincode" class="form-label">Pincode</label>
+                                        <input type="text" class="form-control glass-input" id="companyPincode" 
+                                               value="{{ settings_data.company.pincode if settings_data.company else '' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="companyGstin" class="form-label">GSTIN</label>
+                                        <input type="text" class="form-control glass-input" id="companyGstin" 
+                                               value="{{ settings_data.company.gstin if settings_data.company else '' }}"
+                                               pattern="[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="companyPan" class="form-label">PAN</label>
+                                        <input type="text" class="form-control glass-input" id="companyPan" 
+                                               value="{{ settings_data.company.pan if settings_data.company else '' }}"
+                                               pattern="[A-Z]{5}[0-9]{4}[A-Z]{1}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="companyLogo" class="form-label">Company Logo</label>
+                                <input type="file" class="form-control glass-input" id="companyLogo" accept="image/*">
+                                <small class="text-muted">Upload a logo for your invoices (Max: 2MB, PNG/JPG/SVG)</small>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- User Profile -->
+                <div class="tab-pane fade" id="user">
+                    <div class="glass-card p-4">
+                        <h5 class="fw-bold mb-4">
+                            <i data-feather="user" class="me-2 text-primary"></i>
+                            User Profile
+                        </h5>
+                        
+                        <form id="userForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="username" class="form-label">Username</label>
+                                        <input type="text" class="form-control glass-input" id="username" 
+                                               value="{{ settings_data.user.username if settings_data.user else '' }}" readonly>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="userEmail" class="form-label">Email Address</label>
+                                        <input type="email" class="form-control glass-input" id="userEmail" 
+                                               value="{{ settings_data.user.email if settings_data.user else '' }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="preferredLanguage" class="form-label">Preferred Language</label>
+                                        <select class="form-select glass-input" id="preferredLanguage">
+                                            <option value="en" {% if settings_data.user and settings_data.user.preferred_language == 'en' %}selected{% endif %}>English</option>
+                                            <option value="hi" {% if settings_data.user and settings_data.user.preferred_language == 'hi' %}selected{% endif %}>हिन्दी</option>
+                                            <option value="ta" {% if settings_data.user and settings_data.user.preferred_language == 'ta' %}selected{% endif %}>தமிழ்</option>
+                                            <option value="te" {% if settings_data.user and settings_data.user.preferred_language == 'te' %}selected{% endif %}>తెలుగు</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="themePreference" class="form-label">Theme Preference</label>
+                                        <select class="form-select glass-input" id="themePreference">
+                                            <option value="auto" {% if settings_data.user and settings_data.user.theme_preference == 'auto' %}selected{% endif %}>Auto (System)</option>
+                                            <option value="light" {% if settings_data.user and settings_data.user.theme_preference == 'light' %}selected{% endif %}>Light</option>
+                                            <option value="dark" {% if settings_data.user and settings_data.user.theme_preference == 'dark' %}selected{% endif %}>Dark</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h6 class="fw-bold mb-3">User Preferences</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="aiFeatures" 
+                                                   {% if settings_data.user and settings_data.user.ai_features_enabled %}checked{% endif %}>
+                                            <label class="form-check-label" for="aiFeatures">
+                                                Enable AI Features
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="voiceCommands" 
+                                                   {% if settings_data.user and settings_data.user.voice_commands_enabled %}checked{% endif %}>
+                                            <label class="form-check-label" for="voiceCommands">
+                                                Enable Voice Commands
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="collaborationAccess" 
+                                                   {% if settings_data.user and settings_data.user.collaboration_access %}checked{% endif %}>
+                                            <label class="form-check-label" for="collaborationAccess">
+                                                Enable Collaboration Features
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="biometricEnabled" 
+                                                   {% if settings_data.user and settings_data.user.biometric_enabled %}checked{% endif %}>
+                                            <label class="form-check-label" for="biometricEnabled">
+                                                Enable Biometric Authentication
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="autoSave">
+                                            <label class="form-check-label" for="autoSave">
+                                                Auto-save Drafts
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="dashboardAnimations" checked>
+                                            <label class="form-check-label" for="dashboardAnimations">
+                                                Dashboard Animations
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h6 class="fw-bold mb-3">Change Password</h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="currentPassword" class="form-label">Current Password</label>
+                                            <input type="password" class="form-control glass-input" id="currentPassword">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="newPassword" class="form-label">New Password</label>
+                                            <input type="password" class="form-control glass-input" id="newPassword">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                            <input type="password" class="form-control glass-input" id="confirmPassword">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- AI Settings -->
+                <div class="tab-pane fade" id="ai">
+                    <div class="glass-card p-4">
+                        <h5 class="fw-bold mb-4">
+                            <i data-feather="cpu" class="me-2 text-primary"></i>
+                            AI Configuration
+                        </h5>
+                        
+                        <div class="ai-status-card glass-card-sm p-3 mb-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">AI Engine Status</h6>
+                                    <p class="text-muted mb-0">GPT-4O powered intelligent assistant</p>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-{{ 'success' if settings_data.ai_enabled else 'danger' }} p-2">
+                                        <i data-feather="{{ 'check-circle' if settings_data.ai_enabled else 'x-circle' }}" size="16"></i>
+                                        {{ 'Active' if settings_data.ai_enabled else 'Inactive' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <form id="aiForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold mb-3">AI Features</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="aiAssistant" {{ 'checked' if settings_data.ai_enabled else '' }}>
+                                            <label class="form-check-label" for="aiAssistant">
+                                                AI Assistant & Chat
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="aiSuggestions" checked>
+                                            <label class="form-check-label" for="aiSuggestions">
+                                                Smart Invoice Suggestions
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="aiAnalytics" checked>
+                                            <label class="form-check-label" for="aiAnalytics">
+                                                Predictive Analytics
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="aiRiskAssessment" checked>
+                                            <label class="form-check-label" for="aiRiskAssessment">
+                                                Client Risk Assessment
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="aiDocumentProcessing" checked>
+                                            <label class="form-check-label" for="aiDocumentProcessing">
+                                                Document OCR Processing
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold mb-3">Voice & Language</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="voiceRecognition" checked>
+                                            <label class="form-check-label" for="voiceRecognition">
+                                                Voice Recognition
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="multiLanguageSupport" checked>
+                                            <label class="form-check-label" for="multiLanguageSupport">
+                                                Multi-language Support
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="autoTranslation">
+                                            <label class="form-check-label" for="autoTranslation">
+                                                Auto-translation
+                                            </label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="aiConfidenceThreshold" class="form-label">AI Confidence Threshold</label>
+                                        <input type="range" class="form-range" id="aiConfidenceThreshold" min="0.5" max="1" step="0.05" value="0.7">
+                                        <div class="d-flex justify-content-between">
+                                            <small class="text-muted">Conservative</small>
+                                            <small class="text-muted">Aggressive</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="ai-learning-section mb-4">
+                                <h6 class="fw-bold mb-3">AI Learning & Adaptation</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="learning-metric p-3 glass-card-sm">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="small text-muted">Pattern Recognition</span>
+                                                <span class="small fw-bold">87%</span>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-primary" style="width: 87%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="learning-metric p-3 glass-card-sm">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span class="small text-muted">Prediction Accuracy</span>
+                                                <span class="small fw-bold">92%</span>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar bg-success" style="width: 92%"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Blockchain Settings -->
+                <div class="tab-pane fade" id="blockchain">
+                    <div class="glass-card p-4">
+                        <h5 class="fw-bold mb-4">
+                            <i data-feather="shield" class="me-2 text-primary"></i>
+                            Blockchain Configuration
+                        </h5>
+                        
+                        <div class="blockchain-status-card glass-card-sm p-3 mb-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Blockchain Network</h6>
+                                    <p class="text-muted mb-0">Secure invoice verification system</p>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-{{ 'success' if settings_data.blockchain_enabled else 'danger' }} p-2">
+                                        <i data-feather="{{ 'shield-check' if settings_data.blockchain_enabled else 'shield-off' }}" size="16"></i>
+                                        {{ 'Enabled' if settings_data.blockchain_enabled else 'Disabled' }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <form id="blockchainForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold mb-3">Verification Settings</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="blockchainVerification" {{ 'checked' if settings_data.blockchain_enabled else '' }}>
+                                            <label class="form-check-label" for="blockchainVerification">
+                                                Enable Blockchain Verification
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="autoVerification" checked>
+                                            <label class="form-check-label" for="autoVerification">
+                                                Auto-verify New Invoices
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="smartContracts" checked>
+                                            <label class="form-check-label" for="smartContracts">
+                                                Enable Smart Contracts
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="digitalSignatures" checked>
+                                            <label class="form-check-label" for="digitalSignatures">
+                                                Digital Signatures
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold mb-3">Network Configuration</h6>
+                                        <div class="mb-3">
+                                            <label for="blockchainNetwork" class="form-label">Network Type</label>
+                                            <select class="form-select glass-input" id="blockchainNetwork">
+                                                <option value="ethereum">Ethereum</option>
+                                                <option value="polygon">Polygon</option>
+                                                <option value="binance">Binance Smart Chain</option>
+                                                <option value="private">Private Network</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="gasLimit" class="form-label">Gas Limit</label>
+                                            <input type="number" class="form-control glass-input" id="gasLimit" value="21000">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="confirmationBlocks" class="form-label">Confirmation Blocks</label>
+                                            <input type="number" class="form-control glass-input" id="confirmationBlocks" value="3" min="1" max="12">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="blockchain-stats mb-4">
+                                <h6 class="fw-bold mb-3">Blockchain Statistics</h6>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="stat-card p-3 glass-card-sm text-center">
+                                            <h5 class="text-primary mb-1">156</h5>
+                                            <small class="text-muted">Verified Invoices</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="stat-card p-3 glass-card-sm text-center">
+                                            <h5 class="text-success mb-1">42</h5>
+                                            <small class="text-muted">Active Contracts</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="stat-card p-3 glass-card-sm text-center">
+                                            <h5 class="text-info mb-1">289</h5>
+                                            <small class="text-muted">Total Blocks</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="stat-card p-3 glass-card-sm text-center">
+                                            <h5 class="text-warning mb-1">99.8%</h5>
+                                            <small class="text-muted">Chain Integrity</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Invoice Settings -->
+                <div class="tab-pane fade" id="invoice">
+                    <div class="glass-card p-4">
+                        <h5 class="fw-bold mb-4">
+                            <i data-feather="file-text" class="me-2 text-primary"></i>
+                            Invoice Configuration
+                        </h5>
+                        
+                        <form id="invoiceForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold mb-3">Default Settings</h6>
+                                        <div class="mb-3">
+                                            <label for="defaultTaxRate" class="form-label">Default Tax Rate (%)</label>
+                                            <input type="number" class="form-control glass-input" id="defaultTaxRate" 
+                                                   value="18" min="0" max="50" step="0.01">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="paymentTerms" class="form-label">Default Payment Terms (Days)</label>
+                                            <input type="number" class="form-control glass-input" id="paymentTerms" 
+                                                   value="30" min="1" max="365">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="invoicePrefix" class="form-label">Invoice Number Prefix</label>
+                                            <input type="text" class="form-control glass-input" id="invoicePrefix" 
+                                                   value="AI-INV" maxlength="10">
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="defaultCurrency" class="form-label">Default Currency</label>
+                                            <select class="form-select glass-input" id="defaultCurrency">
+                                                <option value="INR" selected>INR (₹)</option>
+                                                <option value="USD">USD ($)</option>
+                                                <option value="EUR">EUR (€)</option>
+                                                <option value="GBP">GBP (£)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold mb-3">Feature Settings</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="qrCodePayments" checked>
+                                            <label class="form-check-label" for="qrCodePayments">
+                                                Generate QR Codes for Payments
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="digitalWatermark" checked>
+                                            <label class="form-check-label" for="digitalWatermark">
+                                                Add Digital Watermark
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="autoNumbering" checked>
+                                            <label class="form-check-label" for="autoNumbering">
+                                                Auto-generate Invoice Numbers
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+                                            <label class="form-check-label" for="emailNotifications">
+                                                Send Email Notifications
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="autoReminders" checked>
+                                            <label class="form-check-label" for="autoReminders">
+                                                Automated Payment Reminders
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h6 class="fw-bold mb-3">Terms & Conditions</h6>
+                                <textarea class="form-control glass-input" id="defaultTerms" rows="4" 
+                                          placeholder="Enter default terms and conditions for invoices...">Payment due within 30 days of invoice date.
+Interest @ 2% per month will be charged on overdue amounts.
+Subject to local jurisdiction only.</textarea>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h6 class="fw-bold mb-3">PDF Settings</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="pdfTemplate" class="form-label">PDF Template</label>
+                                            <select class="form-select glass-input" id="pdfTemplate">
+                                                <option value="modern">Modern (Default)</option>
+                                                <option value="classic">Classic</option>
+                                                <option value="minimal">Minimal</option>
+                                                <option value="professional">Professional</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="pdfQuality" class="form-label">PDF Quality</label>
+                                            <select class="form-select glass-input" id="pdfQuality">
+                                                <option value="standard">Standard</option>
+                                                <option value="high" selected>High</option>
+                                                <option value="premium">Premium</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Notifications -->
+                <div class="tab-pane fade" id="notifications">
+                    <div class="glass-card p-4">
+                        <h5 class="fw-bold mb-4">
+                            <i data-feather="bell" class="me-2 text-primary"></i>
+                            Notification Settings
+                        </h5>
+                        
+                        <form id="notificationForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold mb-3">Email Notifications</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="invoiceCreated" checked>
+                                            <label class="form-check-label" for="invoiceCreated">
+                                                Invoice Created
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="paymentReceived" checked>
+                                            <label class="form-check-label" for="paymentReceived">
+                                                Payment Received
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="paymentOverdue" checked>
+                                            <label class="form-check-label" for="paymentOverdue">
+                                                Payment Overdue
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="weeklyReports" checked>
+                                            <label class="form-check-label" for="weeklyReports">
+                                                Weekly Business Reports
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold mb-3">System Notifications</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="browserNotifications" checked>
+                                            <label class="form-check-label" for="browserNotifications">
+                                                Browser Notifications
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="soundNotifications">
+                                            <label class="form-check-label" for="soundNotifications">
+                                                Sound Notifications
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="mobileNotifications" checked>
+                                            <label class="form-check-label" for="mobileNotifications">
+                                                Mobile Push Notifications
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="aiInsightNotifications" checked>
+                                            <label class="form-check-label" for="aiInsightNotifications">
+                                                AI Insight Notifications
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h6 class="fw-bold mb-3">Reminder Schedule</h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="firstReminder" class="form-label">First Reminder (Days before due)</label>
+                                            <input type="number" class="form-control glass-input" id="firstReminder" value="7" min="1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="secondReminder" class="form-label">Second Reminder (Days before due)</label>
+                                            <input type="number" class="form-control glass-input" id="secondReminder" value="3" min="1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="finalReminder" class="form-label">Final Reminder (Days after due)</label>
+                                            <input type="number" class="form-control glass-input" id="finalReminder" value="5" min="1">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Security -->
+                <div class="tab-pane fade" id="security">
+                    <div class="glass-card p-4">
+                        <h5 class="fw-bold mb-4">
+                            <i data-feather="lock" class="me-2 text-primary"></i>
+                            Security Settings
+                        </h5>
+                        
+                        <form id="securityForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold mb-3">Authentication</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="twoFactorAuth">
+                                            <label class="form-check-label" for="twoFactorAuth">
+                                                Two-Factor Authentication
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="sessionTimeout" checked>
+                                            <label class="form-check-label" for="sessionTimeout">
+                                                Auto Session Timeout
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="loginAudit" checked>
+                                            <label class="form-check-label" for="loginAudit">
+                                                Login Activity Audit
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="sessionDuration" class="form-label">Session Duration (Hours)</label>
+                                            <input type="number" class="form-control glass-input" id="sessionDuration" value="8" min="1" max="24">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold mb-3">Data Protection</h6>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="dataEncryption" checked>
+                                            <label class="form-check-label" for="dataEncryption">
+                                                End-to-End Encryption
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="autoBackup" checked>
+                                            <label class="form-check-label" for="autoBackup">
+                                                Automatic Backups
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-2">
+                                            <input class="form-check-input" type="checkbox" id="auditLogging" checked>
+                                            <label class="form-check-label" for="auditLogging">
+                                                Comprehensive Audit Logging
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="backupFrequency" class="form-label">Backup Frequency</label>
+                                            <select class="form-select glass-input" id="backupFrequency">
+                                                <option value="daily" selected>Daily</option>
+                                                <option value="weekly">Weekly</option>
+                                                <option value="monthly">Monthly</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h6 class="fw-bold mb-3">Access Control</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="ipWhitelist" class="form-label">IP Whitelist (Optional)</label>
+                                            <textarea class="form-control glass-input" id="ipWhitelist" rows="3" 
+                                                      placeholder="Enter IP addresses, one per line"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="allowedDomains" class="form-label">Allowed Email Domains</label>
+                                            <textarea class="form-control glass-input" id="allowedDomains" rows="3" 
+                                                      placeholder="Enter domains, one per line (e.g., company.com)"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="security-status">
+                                <h6 class="fw-bold mb-3">Security Status</h6>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="security-metric p-3 glass-card-sm text-center">
+                                            <h5 class="text-success mb-1">98%</h5>
+                                            <small class="text-muted">Security Score</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="security-metric p-3 glass-card-sm text-center">
+                                            <h5 class="text-info mb-1">0</h5>
+                                            <small class="text-muted">Failed Logins</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="security-metric p-3 glass-card-sm text-center">
+                                            <h5 class="text-warning mb-1">2</h5>
+                                            <small class="text-muted">Active Sessions</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="security-metric p-3 glass-card-sm text-center">
+                                            <h5 class="text-success mb-1">Latest</h5>
+                                            <small class="text-muted">Security Patches</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSettings();
+    setupEventListeners();
+});
+
+function initializeSettings() {
+    // Initialize theme based on user preference
+    const theme = document.getElementById('themePreference').value;
+    applyTheme(theme);
+    
+    // Setup form validation
+    setupFormValidation();
+    
+    // Load saved settings
+    loadUserPreferences();
+}
+
+function setupEventListeners() {
+    // Save all settings button
+    document.getElementById('saveAllSettings').addEventListener('click', saveAllSettings);
+    
+    // Reset settings button
+    document.getElementById('resetSettings').addEventListener('click', resetSettings);
+    
+    // Theme change
+    document.getElementById('themePreference').addEventListener('change', function() {
+        applyTheme(this.value);
+    });
+    
+    // Password validation
+    document.getElementById('confirmPassword').addEventListener('input', validatePasswords);
+    
+    // Auto-save on certain changes
+    const autoSaveFields = ['aiConfidenceThreshold', 'defaultTaxRate', 'paymentTerms'];
+    autoSaveFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.addEventListener('change', debounce(autoSave, 1000));
+        }
+    });
+    
+    // Tab navigation with icons
+    document.querySelectorAll('[data-bs-toggle="pill"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function() {
+            feather.replace();
+        });
+    });
+}
+
+function saveAllSettings() {
+    const saveBtn = document.getElementById('saveAllSettings');
+    const originalText = saveBtn.innerHTML;
+    
+    // Show loading state
+    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+    saveBtn.disabled = true;
+    
+    // Collect all form data
+    const settings = {
+        company: collectFormData('companyForm'),
+        user: collectFormData('userForm'),
+        ai: collectFormData('aiForm'),
+        blockchain: collectFormData('blockchainForm'),
+        invoice: collectFormData('invoiceForm'),
+        notifications: collectFormData('notificationForm'),
+        security: collectFormData('securityForm')
+    };
+    
+    // Simulate save operation
+    setTimeout(() => {
+        saveBtn.innerHTML = '<i data-feather="check" class="me-1"></i> Saved Successfully';
+        saveBtn.classList.remove('btn-success');
+        saveBtn.classList.add('btn-outline-success');
+        feather.replace();
+        
+        // Reset button after 2 seconds
+        setTimeout(() => {
+            saveBtn.innerHTML = originalText;
+            saveBtn.classList.remove('btn-outline-success');
+            saveBtn.classList.add('btn-success');
+            saveBtn.disabled = false;
+            feather.replace();
+        }, 2000);
+        
+        // Show success notification
+        showNotification('Settings saved successfully!', 'success');
+        
+        // In real application, send to backend
+        console.log('Settings to save:', settings);
+    }, 1500);
+}
+
+function resetSettings() {
+    if (confirm('Are you sure you want to reset all settings to defaults? This action cannot be undone.')) {
+        // Reset all forms
+        document.querySelectorAll('form').forEach(form => form.reset());
+        
+        // Reset specific values
+        document.getElementById('aiConfidenceThreshold').value = 0.7;
+        document.getElementById('defaultTaxRate').value = 18;
+        document.getElementById('paymentTerms').value = 30;
+        document.getElementById('themePreference').value = 'auto';
+        
+        // Apply default theme
+        applyTheme('auto');
+        
+        showNotification('Settings reset to defaults', 'info');
+    }
+}
+
+function collectFormData(formId) {
+    const form = document.getElementById(formId);
+    if (!form) return {};
+    
+    const formData = new FormData(form);
+    const data = {};
+    
+    // Collect text inputs
+    form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], input[type="url"], input[type="number"], textarea, select').forEach(input => {
+        data[input.id] = input.value;
+    });
+    
+    // Collect checkboxes
+    form.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+        data[checkbox.id] = checkbox.checked;
+    });
+    
+    // Collect range inputs
+    form.querySelectorAll('input[type="range"]').forEach(range => {
+        data[range.id] = parseFloat(range.value);
+    });
+    
+    return data;
+}
+
+function setupFormValidation() {
+    // Password confirmation validation
+    function validatePasswords() {
+        const newPassword = document.getElementById('newPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+        
+        if (newPassword.value && confirmPassword.value) {
+            if (newPassword.value !== confirmPassword.value) {
+                confirmPassword.setCustomValidity('Passwords do not match');
+                confirmPassword.classList.add('is-invalid');
+            } else {
+                confirmPassword.setCustomValidity('');
+                confirmPassword.classList.remove('is-invalid');
+                confirmPassword.classList.add('is-valid');
+            }
+        }
+    }
+    
+    // GST validation
+    const gstinInput = document.getElementById('companyGstin');
+    if (gstinInput) {
+        gstinInput.addEventListener('input', function() {
+            const gstin = this.value.toUpperCase();
+            const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+            
+            if (gstin && !gstRegex.test(gstin)) {
+                this.setCustomValidity('Invalid GSTIN format');
+                this.classList.add('is-invalid');
+            } else {
+                this.setCustomValidity('');
+                this.classList.remove('is-invalid');
+                if (gstin) this.classList.add('is-valid');
+            }
+        });
+    }
+    
+    // PAN validation
+    const panInput = document.getElementById('companyPan');
+    if (panInput) {
+        panInput.addEventListener('input', function() {
+            const pan = this.value.toUpperCase();
+            const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+            
+            if (pan && !panRegex.test(pan)) {
+                this.setCustomValidity('Invalid PAN format');
+                this.classList.add('is-invalid');
+            } else {
+                this.setCustomValidity('');
+                this.classList.remove('is-invalid');
+                if (pan) this.classList.add('is-valid');
+            }
+        });
+    }
+}
+
+function applyTheme(theme) {
+    const html = document.documentElement;
+    
+    if (theme === 'dark') {
+        html.setAttribute('data-theme', 'dark');
+    } else if (theme === 'light') {
+        html.setAttribute('data-theme', 'light');
+    } else {
+        // Auto theme - use system preference
+        html.setAttribute('data-theme', 'auto');
+        
+        // Listen for system theme changes
+        if (window.matchMedia) {
+            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+            mediaQuery.addEventListener('change', function(e) {
+                if (document.getElementById('themePreference').value === 'auto') {
+                    html.setAttribute('data-theme', e.matches ? 'dark' : 'light');
+                }
+            });
+        }
+    }
+}
+
+function loadUserPreferences() {
+    // Load preferences from localStorage or backend
+    const preferences = JSON.parse(localStorage.getItem('userPreferences') || '{}');
+    
+    // Apply saved preferences
+    Object.keys(preferences).forEach(key => {
+        const element = document.getElementById(key);
+        if (element) {
+            if (element.type === 'checkbox') {
+                element.checked = preferences[key];
+            } else {
+                element.value = preferences[key];
+            }
+        }
+    });
+}
+
+function autoSave() {
+    // Auto-save critical settings
+    const criticalSettings = {
+        aiConfidenceThreshold: document.getElementById('aiConfidenceThreshold').value,
+        defaultTaxRate: document.getElementById('defaultTaxRate').value,
+        paymentTerms: document.getElementById('paymentTerms').value,
+        themePreference: document.getElementById('themePreference').value
+    };
+    
+    localStorage.setItem('userPreferences', JSON.stringify(criticalSettings));
+    
+    // Show subtle save indicator
+    showNotification('Settings auto-saved', 'info', 2000);
+}
+
+function showNotification(message, type = 'info', duration = 5000) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = `
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        animation: slideInRight 0.3s ease;
+    `;
+    
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after duration
+    setTimeout(() => {
+        notification.remove();
+    }, duration);
+}
+
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Add animation styles
+const style = document.createElement('style');
+style.textContent = `
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.settings-nav .nav-link {
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    margin: 0 2px;
+}
+
+.settings-nav .nav-link:hover {
+    background: rgba(59, 130, 246, 0.1);
+    transform: translateY(-2px);
+}
+
+.settings-nav .nav-link.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.progress {
+    height: 8px;
+    border-radius: 4px;
+}
+
+.stat-card, .security-metric, .learning-metric {
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover, .security-metric:hover, .learning-metric:hover {
+    transform: translateY(-3px);
+}
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

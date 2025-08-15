@@ -1,0 +1,190 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Revolutionary Invoice System{% endblock %}
+
+{% block content %}
+<div class="container-fluid vh-100">
+    <div class="row h-100">
+        <!-- Left Side - Branding -->
+        <div class="col-lg-6 d-none d-lg-flex align-items-center justify-content-center bg-gradient-primary">
+            <div class="text-center text-white">
+                <div class="mb-4">
+                    <i data-feather="zap" size="120" class="text-white"></i>
+                </div>
+                <h1 class="display-4 fw-bold mb-3">Revolutionary Invoice</h1>
+                <p class="lead mb-4">AI-Powered • Blockchain Secured • Voice Enabled</p>
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <i data-feather="cpu" size="48" class="mb-2"></i>
+                        <h5>AI Assistant</h5>
+                        <p class="small">Smart suggestions and predictions</p>
+                    </div>
+                    <div class="col-md-4">
+                        <i data-feather="shield" size="48" class="mb-2"></i>
+                        <h5>Blockchain</h5>
+                        <p class="small">Tamper-proof verification</p>
+                    </div>
+                    <div class="col-md-4">
+                        <i data-feather="mic" size="48" class="mb-2"></i>
+                        <h5>Voice Control</h5>
+                        <p class="small">Create invoices by speaking</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Side - Login Form -->
+        <div class="col-lg-6 d-flex align-items-center justify-content-center">
+            <div class="glass-card p-5" style="width: 100%; max-width: 400px;">
+                <div class="text-center mb-4">
+                    <div class="logo-container mb-3">
+                        <i data-feather="zap" size="48" class="text-primary"></i>
+                    </div>
+                    <h2 class="fw-bold text-primary">Welcome Back</h2>
+                    <p class="text-muted">Sign in to your revolutionary invoice system</p>
+                </div>
+                
+                <form method="POST" id="loginForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text glass-input-addon">
+                                <i data-feather="user" size="18"></i>
+                            </span>
+                            <input type="text" class="form-control glass-input" id="username" name="username" 
+                                   required autocomplete="username" placeholder="Enter your username">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text glass-input-addon">
+                                <i data-feather="lock" size="18"></i>
+                            </span>
+                            <input type="password" class="form-control glass-input" id="password" name="password" 
+                                   required autocomplete="current-password" placeholder="Enter your password">
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                <i data-feather="eye" size="18"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">
+                            Remember me for 30 days
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 glass-btn-primary mb-3">
+                        <i data-feather="log-in" size="18" class="me-2"></i>
+                        Sign In
+                    </button>
+                    
+                    <!-- Demo Credentials -->
+                    <div class="text-center">
+                        <small class="text-muted">
+                            Demo: admin / RevolutionaryAI2025!
+                        </small>
+                    </div>
+                </form>
+                
+                <!-- AI Features Showcase -->
+                <div class="mt-4 pt-4 border-top">
+                    <h6 class="text-center mb-3">🚀 Revolutionary Features</h6>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="feature-card glass-card-sm p-2 text-center">
+                                <i data-feather="cpu" size="24" class="text-primary mb-1"></i>
+                                <small class="d-block">AI Predictions</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="feature-card glass-card-sm p-2 text-center">
+                                <i data-feather="camera" size="24" class="text-success mb-1"></i>
+                                <small class="d-block">OCR Scanning</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="feature-card glass-card-sm p-2 text-center">
+                                <i data-feather="smartphone" size="24" class="text-info mb-1"></i>
+                                <small class="d-block">QR Payments</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="feature-card glass-card-sm p-2 text-center">
+                                <i data-feather="globe" size="24" class="text-warning mb-1"></i>
+                                <small class="d-block">Multi-Language</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.feature-card {
+    transition: transform 0.2s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-2px);
+}
+
+.logo-container {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Password toggle
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    
+    togglePassword.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        
+        const icon = this.querySelector('i');
+        if (type === 'password') {
+            icon.setAttribute('data-feather', 'eye');
+        } else {
+            icon.setAttribute('data-feather', 'eye-off');
+        }
+        feather.replace();
+    });
+    
+    // Login form animation
+    const form = document.getElementById('loginForm');
+    form.addEventListener('submit', function(e) {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Signing in...';
+        submitBtn.disabled = true;
+    });
+    
+    // Auto-fill demo credentials
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.shiftKey && e.key === 'D') {
+            document.getElementById('username').value = 'admin';
+            document.getElementById('password').value = 'RevolutionaryAI2025!';
+        }
+    });
+});
+</script>
+{% endblock %}

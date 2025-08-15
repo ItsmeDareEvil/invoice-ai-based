@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Add New Client{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="glass-card p-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="fw-bold text-primary mb-1">
+                            <i data-feather="user-plus" class="me-2"></i>
+                            Add New Client
+                        </h1>
+                        <p class="text-muted mb-0">Register a client to manage invoices and reminders efficiently.</p>
+                    </div>
+                    <div>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary glass-btn">
+                            <i data-feather="arrow-left" class="me-1"></i> Back
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" id="clientForm">
+        <div class="row">
+            <!-- Basic Info -->
+            <div class="col-md-6 mb-4">
+                <div class="glass-card p-4">
+                    <h5 class="fw-bold mb-3 text-primary">
+                        <i data-feather="user" class="me-2"></i>Basic Information
+                    </h5>
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Company/Client Name *</label>
+                        <input type="text" class="form-control glass-input" id="name" name="name" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="contact_person" class="form-label">Contact Person</label>
+                        <input type="text" class="form-control glass-input" id="contact_person" name="contact_person">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="phone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control glass-input" id="phone" name="phone">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control glass-input" id="email" name="email">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="client_type" class="form-label">Client Type</label>
+                        <select class="form-select glass-input" id="client_type" name="client_type">
+                            <option value="Regular">Regular</option>
+                            <option value="VIP">VIP</option>
+                            <option value="New">New</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Info -->
+            <div class="col-md-6 mb-4">
+                <div class="glass-card p-4">
+                    <h5 class="fw-bold mb-3 text-primary">
+                        <i data-feather="map-pin" class="me-2"></i>Address & Location
+                    </h5>
+
+                    <div class="mb-3">
+                        <label for="address" class="form-label">Address</label>
+                        <textarea class="form-control glass-input" id="address" name="address" rows="3"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="city" class="form-label">City</label>
+                            <input type="text" class="form-control glass-input" id="city" name="city">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="state" class="form-label">State</label>
+                            <select class="form-select glass-input" id="state" name="state">
+                                <option value="">Select State</option>
+                                <option value="Tamil Nadu">Tamil Nadu</option>
+                                <option value="Karnataka">Karnataka</option>
+                                <option value="Delhi">Delhi</option>
+                                <!-- Add more states as needed -->
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="pincode" class="form-label">PIN Code</label>
+                        <input type="text" class="form-control glass-input" id="pincode" name="pincode" maxlength="6">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Business Info -->
+            <div class="col-md-6 mb-4">
+                <div class="glass-card p-4">
+                    <h5 class="fw-bold mb-3 text-primary">
+                        <i data-feather="briefcase" class="me-2"></i>Business Details
+                    </h5>
+
+                    <div class="mb-3">
+                        <label for="gstin" class="form-label">GSTIN</label>
+                        <input type="text" class="form-control glass-input" id="gstin" name="gstin" maxlength="15">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="pan" class="form-label">PAN</label>
+                        <input type="text" class="form-control glass-input" id="pan" name="pan" maxlength="10">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="notes" class="form-label">Notes</label>
+                        <textarea class="form-control glass-input" id="notes" name="notes" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CRM Info -->
+            <div class="col-md-6 mb-4">
+                <div class="glass-card p-4">
+                    <h5 class="fw-bold mb-3 text-primary">
+                        <i data-feather="activity" class="me-2"></i>CRM Information
+                    </h5>
+
+                    <div class="mb-3">
+                        <label for="lead_stage" class="form-label">Lead Stage</label>
+                        <select class="form-select glass-input" id="lead_stage" name="lead_stage">
+                            <option value="New">New</option>
+                            <option value="In Discussion">In Discussion</option>
+                            <option value="Quoted">Quoted</option>
+                            <option value="Closed">Closed Won</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="follow_up_date" class="form-label">Follow-up Date</label>
+                        <input type="date" class="form-control glass-input" id="follow_up_date" name="follow_up_date">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tags" class="form-label">Tags</label>
+                        <input type="text" class="form-control glass-input" id="tags" name="tags" 
+                               placeholder="e.g. high-priority, recurring">
+                    </div>
+
+                    <div class="form-check mb-2">
+                        <input class="form-check-input" type="checkbox" id="set_reminder" name="set_reminder">
+                        <label class="form-check-label" for="set_reminder">
+                            Set 44-day follow-up reminder after first invoice
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="row">
+            <div class="col-12 text-end">
+                <button type="reset" class="btn btn-outline-primary glass-btn me-2">
+                    <i data-feather="rotate-ccw" class="me-1"></i> Clear Form
+                </button>
+                <button type="submit" class="btn btn-success glass-btn">
+                    <i data-feather="save" class="me-1"></i> Save Client
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
