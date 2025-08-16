@@ -501,11 +501,17 @@ def analytics():
                 logging.error(f"Blockchain analytics failed: {e}")
         
         return render_template('analytics.html', analytics_data=analytics_data)
-        
+    
     except Exception as e:
         logging.error(f"Analytics error: {e}")
         flash('Error loading analytics data.', 'error')
-        return render_template('analytics.html', error=str(e))
+        
+        return render_template('analytics.html', analytics_data={'revenue_trends': {},
+        'client_performance': {},
+        'payment_analytics': {},
+        'profitability_analysis': {},
+        'ai_predictions': {},
+        'blockchain_insights': {}}, error=str(e))
 
 @app.route('/ai_assistant')
 @login_required
