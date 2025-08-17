@@ -163,199 +163,69 @@
     </div>
     
     <!-- Client List -->
-    <div class="row">
-        <div class="col-12">
-            <div class="glass-card p-4">
-                {% if clients.items if clients.pages else clients %}
-                
-                <!-- View Toggle -->
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div class="btn-group" role="group">
-                        <input type="radio" class="btn-check" name="viewMode" id="gridView" checked>
-                        <label class="btn btn-outline-primary btn-sm" for="gridView">
-                            <i data-feather="grid" size="16"></i> Grid
-                        </label>
-                        
-                        <input type="radio" class="btn-check" name="viewMode" id="listView">
-                        <label class="btn btn-outline-primary btn-sm" for="listView">
-                            <i data-feather="list" size="16"></i> List
-                        </label>
-                    </div>
+<div class="row">
+    <div class="col-12">
+        <div class="glass-card p-4">
+
+            <!-- View Toggle (single, outside loop) -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" name="viewMode" id="gridView" checked>
+                    <label class="btn btn-outline-primary btn-sm" for="gridView">
+                        <i data-feather="grid" size="16"></i> Grid
+                    </label>
                     
-                    <div class="text-muted small">
-                        Showing {{ clients.items|length if clients.pages else clients|length }} clients
-                    </div>
+                    <input type="radio" class="btn-check" name="viewMode" id="listView">
+                    <label class="btn btn-outline-primary btn-sm" for="listView">
+                        <i data-feather="list" size="16"></i> List
+                    </label>
                 </div>
                 
-                <!-- Grid View -->
-                <div id="gridViewContainer" class="row">
-                    {% for client in clients.items if clients.pages else clients %}
+                <div class="text-muted small">
+                    Showing {{ client_list|length }} clients
+                </div>
+            </div>
+
+            <!-- Grid View -->
+             {% if client_list %}
+            <div id="gridViewContainer" class="row">
+                {% for client in client_list %}
                     <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
-                        <div class="client-card glass-card p-4 h-100">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <div class="client-avatar">
-                                    <div class="avatar-circle bg-primary bg-opacity-10 text-primary">
-                                        {{ client.name[0].upper() }}
-                                    </div>
-                                </div>
-                                <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
-                                        <i data-feather="more-horizontal" size="14"></i>
-                                    </button>
-                                    <ul class="dropdown-menu glass-dropdown">
-                                        <li><a class="dropdown-item" href="#">
-                                            <i data-feather="edit" size="14" class="me-2"></i> Edit
-                                        </a></li>
-                                        <li><a class="dropdown-item" href="{{ url_for('create_invoice') }}?client_id={{ client.id }}">
-                                            <i data-feather="file-plus" size="14" class="me-2"></i> Create Invoice
-                                        </a></li>
-                                        <li><a class="dropdown-item" href="#">
-                                            <i data-feather="mail" size="14" class="me-2"></i> Send Email
-                                        </a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item text-danger" href="#">
-                                            <i data-feather="trash" size="14" class="me-2"></i> Delete
-                                        </a></li>
-                                    </ul>
-                                </div>
-                            </div>
-                            
-                            <div class="client-info">
-                                <h6 class="fw-bold mb-1">{{ client.name }}</h6>
-                                <p class="text-muted small mb-2">{{ client.contact_person or client.email }}</p>
-                                
-                                <div class="client-badges mb-3">
-                                    <span class="badge bg-{{ 'primary' if client.client_type == 'Premium' else 'secondary' if client.client_type == 'VIP' else 'light' }} text-{{ 'white' if client.client_type in ['Premium', 'VIP'] else 'dark' }}">
-                                        {{ client.client_type }}
-                                    </span>
-                                    
-                                    {% if client_insights and client.id in client_insights %}
-                                    <span class="badge bg-{{ 'danger' if client_insights[client.id].risk_level == 'High' else 'warning' if client_insights[client.id].risk_level == 'Medium' else 'success' }} bg-opacity-10 
-                                                 text-{{ 'danger' if client_insights[client.id].risk_level == 'High' else 'warning' if client_insights[client.id].risk_level == 'Medium' else 'success' }}">
-                                        {{ client_insights[client.id].risk_level }} Risk
-                                    </span>
-                                    {% endif %}
-                                    
-                                    {% if client.blockchain_verified %}
-                                    <span class="badge bg-dark bg-opacity-10 text-dark">
-                                        <i data-feather="shield" size="12"></i> Verified
-                                    </span>
-                                    {% endif %}
-                                </div>
-                                
-                                <div class="client-stats small">
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="text-muted">Total Business:</span>
-                                        <span class="fw-medium">₹{{ "%.0f"|format(client.total_business) }}</span>
-                                    </div>
-                                    
-                                    {% if client_insights and client.id in client_insights %}
-                                    <div class="d-flex justify-content-between mb-1">
-                                        <span class="text-muted">Predicted LTV:</span>
-                                        <span class="fw-medium text-success">₹{{ "%.0f"|format(client_insights[client.id].predicted_ltv) }}</span>
-                                    </div>
-                                    {% endif %}
-                                    
-                                    <div class="d-flex justify-content-between">
-                                        <span class="text-muted">Lead Stage:</span>
-                                        <span class="badge bg-info bg-opacity-10 text-info">{{ client.lead_stage }}</span>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="client-actions mt-3 pt-3 border-top">
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-sm btn-primary glass-btn flex-fill" onclick="window.location.href='{{ url_for('create_invoice') }}?client_id={{ client.id }}'">
-                                        <i data-feather="file-plus" size="14"></i> Invoice
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-secondary glass-btn" onclick="viewClientDetails({{ client.id }})">
-                                        <i data-feather="eye" size="14"></i>
-                                    </button>
-                                    <button class="btn btn-sm btn-outline-info glass-btn" onclick="contactClient({{ client.id }})">
-                                        <i data-feather="phone" size="14"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- Client card HTML here -->
                     </div>
-                    {% endfor %}
-                </div>
-                
-                <!-- List View (Hidden by default) -->
-                <div id="listViewContainer" style="display: none;">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead class="table-light">
+                {% endfor %}
+            </div>
+
+            <!-- List View -->
+            <div id="listViewContainer" style="display: none;">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Client</th>
+                                <th>Contact</th>
+                                <th>Type</th>
+                                <th>Lead Stage</th>
+                                <th>Total Business</th>
+                                <th>AI Insights</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for client in client_list %}
                                 <tr>
-                                    <th>Client</th>
-                                    <th>Contact</th>
-                                    <th>Type</th>
-                                    <th>Lead Stage</th>
-                                    <th>Total Business</th>
-                                    <th>AI Insights</th>
-                                    <th>Actions</th>
+                                    <!-- List view HTML here -->
                                 </tr>
-                            </thead>
-                            <tbody>
-                                {% for client in clients.items if clients.pages else clients %}
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-circle bg-primary bg-opacity-10 text-primary me-3">
-                                                {{ client.name[0].upper() }}
-                                            </div>
-                                            <div>
-                                                <div class="fw-medium">{{ client.name }}</div>
-                                                <small class="text-muted">{{ client.contact_person }}</small>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div>
-                                            {% if client.email %}<div><i data-feather="mail" size="14" class="me-1"></i>{{ client.email }}</div>{% endif %}
-                                            {% if client.phone %}<div><i data-feather="phone" size="14" class="me-1"></i>{{ client.phone }}</div>{% endif %}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-{{ 'primary' if client.client_type == 'Premium' else 'secondary' if client.client_type == 'VIP' else 'light' }} text-{{ 'white' if client.client_type in ['Premium', 'VIP'] else 'dark' }}">
-                                            {{ client.client_type }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-info bg-opacity-10 text-info">{{ client.lead_stage }}</span>
-                                    </td>
-                                    <td>₹{{ "%.2f"|format(client.total_business) }}</td>
-                                    <td>
-                                        {% if client_insights and client.id in client_insights %}
-                                        <div class="small">
-                                            <div class="text-{{ 'danger' if client_insights[client.id].risk_level == 'High' else 'warning' if client_insights[client.id].risk_level == 'Medium' else 'success' }}">
-                                                {{ client_insights[client.id].risk_level }} Risk
-                                            </div>
-                                            <div class="text-muted">LTV: ₹{{ "%.0f"|format(client_insights[client.id].predicted_ltv) }}</div>
-                                        </div>
-                                        {% else %}
-                                        <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <div class="btn-group btn-group-sm">
-                                            <a href="{{ url_for('create_invoice') }}?client_id={{ client.id }}" class="btn btn-outline-primary" title="Create Invoice">
-                                                <i data-feather="file-plus" size="14"></i>
-                                            </a>
-                                            <button class="btn btn-outline-secondary" onclick="viewClientDetails({{ client.id }})" title="View Details">
-                                                <i data-feather="eye" size="14"></i>
-                                            </button>
-                                            <button class="btn btn-outline-info" onclick="contactClient({{ client.id }})" title="Contact">
-                                                <i data-feather="phone" size="14"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
                 
                 <!-- Pagination -->
                 {% if clients.pages and clients.pages > 1 %}

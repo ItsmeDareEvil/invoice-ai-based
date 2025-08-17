@@ -403,11 +403,14 @@ def client_management():
         page=page, per_page=20, error_out=False
     )
     
+    # Prepare iterable for template
+    client_list = clients.items if hasattr(clients, 'items') else clients
+
     # AI insights for clients
     client_insights = {}
     if app.config.get("AI_FEATURES_ENABLED") and ai_assistant:
         try:
-            for client in clients.items:
+            for client in client_list:
                 if client.ai_risk_score > 0:
                     client_insights[client.id] = {
                         'risk_level': 'High' if client.ai_risk_score > 0.7 else 'Medium' if client.ai_risk_score > 0.3 else 'Low',
@@ -417,11 +420,14 @@ def client_management():
         except Exception as e:
             logging.error(f"Client insights failed: {e}")
     
-    return render_template('client_management.html',
-                         clients=clients,
-                         search=search,
-                         client_type=client_type,
-                         client_insights=client_insights)
+    return render_template(
+        'client_management.html',
+        clients=clients,
+        client_list=client_list,
+        search=search,
+        client_type=client_type,
+        client_insights=client_insights
+    )
 
 @app.route('/create_client', methods=['GET', 'POST'])
 @login_required
@@ -596,6 +602,7 @@ def api_document_scan():
         filename = secure_filename(file.filename)
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
+        
         
         # Process with OCR
         scan_type = request.form.get('type', 'invoice')
