@@ -59,6 +59,12 @@
                             <i data-feather="trending-up" class="me-1"></i> Analytics
                         </a>
                     </li>
+                <li class="nav-item">
+                    <a class="nav-link {% if request.endpoint == 'delivery' %}active{% endif %}" href="{{ url_for('delivery') }}">
+                        <i data-feather="truck" class="me-1"></i> Delivery
+                    </a>
+                </li>
+
                     {% if ai_enabled %}
                     <li class="nav-item">
                         <a class="nav-link {% if request.endpoint == 'ai_assistant_page' %}active{% endif %}" href="{{ url_for('ai_assistant_page') }}">

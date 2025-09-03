@@ -543,6 +543,12 @@ def settings():
     
     return render_template('settings.html', settings_data=settings_data)
 
+@app.route("/delivery")
+@login_required
+def delivery():
+    return render_template("delivery_challan.html")
+
+
 # API Routes for AJAX and Advanced Features
 
 @app.route('/api/voice_command', methods=['POST'])
