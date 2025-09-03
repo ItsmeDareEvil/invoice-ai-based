@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Proforma Invoice {{ invoice.invoice_number }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 10px;
+            margin: 20px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 10px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 4px 6px;
+            vertical-align: top;
+        }
+        th {
+            font-weight: bold;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+        .invoice-title {
+            font-size: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-align: center;
+            border: 1px solid black;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+        .company-details {
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-align: center;
+        }
+        .contact-details {
+            text-align: center;
+            font-size: 10px;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            background-color: black;
+            color: white;
+            font-weight: bold;
+            padding: 4px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+        .info-table td {
+            border: 1px solid black;
+            padding: 4px 6px;
+            font-size: 10px;
+        }
+        .amount-in-words {
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 10px;
+        }
+        .signature-box {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .footer-contact {
+            font-size: 8px;
+            text-align: center;
+            margin-top: 20px;
+            border-top: 1px solid black;
+            padding-top: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-title">PROFORMA INVOICE</div>
+
+    <div style="margin-bottom: 10px;">
+    <table style="width: 100%; border: 1px dashed black;">
+        <tr>
+            <td style="width: 50%; font-size: 10px; text-align: left; padding: 4px;">
+                <strong>Invoice No:</strong> {{ invoice.invoice_number }}<br>
+                <strong>Date:</strong> {{ invoice.invoice_date.strftime('%d-%m-%Y') }}<br>
+                <span style="font-size: 8px;">(TRIPLICATE FOR RECIPIENT)</span>
+            </td>
+            <td style="width: 50%; font-size: 12px; font-weight: bold; text-transform: uppercase; text-align: right; padding: 4px;">
+                OMPS ENGINEERING INDUSTRIES<br>
+                <span style="font-weight: normal; font-size: 10px;">No. 39, 9th Street, Kamaraj Nagar, Avadi, Chennai - 600071</span>
+            </td>
+        </tr>
+    </table>
+</div>
+
+    <table class="info-table">
+        <tr>
+            <td style="width: 50%;">
+                <div class="section-title">To</div>
+                <strong>{{ invoice.client.name }}</strong><br>
+                {{ invoice.client.address }}<br>
+                {{ invoice.client.city }}, {{ invoice.client.state }} - {{ invoice.client.pincode }}<br>
+                Tamil Nadu, India<br>
+                <strong>GSTIN:</strong> {{ invoice.client.gstin or '' }}<br>
+            </td>
+            <td style="width: 50%;">
+                <div class="section-title">Our Details</div>
+                <strong>GSTIN:</strong> {{ invoice.company.gstin if invoice.company else '33AAFF01969B1Z1' }}<br>
+                <strong>PAN:</strong> {{ invoice.company.pan if invoice.company else 'AAFF01969B1' }}<br>
+                <strong>TIN:</strong> {{ invoice.company.tin if invoice.company else '33436486057' }}
+            </td>
+        </tr>
+    </table>
+
+    <table style="margin-top: 10px;">
+        <thead>
+            <tr>
+                <th>Sl No</th>
+                <th>HSN Code</th>
+                <th>Product Name / Description</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in invoice.line_items %}
+            <tr>
+                <td style="text-align: center;">{{ item.sr_no }}</td>
+                <td style="text-align: center;">{{ item.hsn_code }}</td>
+                <td style="white-space: pre-line;">{{ item.description | replace('\n', '<br>') | safe }}</td>
+                <td style="text-align: center;">{{ item.quantity }}</td>
+                <td style="text-align: right;">₹{{ "{:,.2f}".format(item.unit_price) }}</td>
+                <td style="text-align: right;">₹{{ "{:,.2f}".format(item.total_amount) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <table style="margin-top: 10px; width: 100%;">
+        <tr>
+            <td style="width: 50%; vertical-align: top;">
+                <table style="width: 100%;">
+                    <tr><td><strong>Party GST NO:</strong></td><td style="text-align: right;">{{ invoice.client.gstin or '' }}</td></tr>
+                    <tr><td><strong>Ref. Dt:</strong></td><td style="text-align: right;">________</td></tr>
+                    <tr><td><strong>Ref. No:</strong></td><td style="text-align: right;">_________</td></tr>
+                    <tr><td><strong>PO No:</strong></td><td style="text-align: right;">________</td></tr>
+                    <tr><td><strong>Date:</strong></td><td style="text-align: right;">________</td></tr>
+                </table>
+            </td>
+            <td style="width: 50%; vertical-align: top;">
+                <table style="width: 100%;">
+                    <tr><td><strong>Sub Total</strong></td><td style="text-align: right;">₹{{ "{:,.2f}".format(invoice.subtotal) }}</td></tr>
+                    <tr><td><strong>SGST 9%</strong></td><td style="text-align: right;">₹{{ "{:,.2f}".format(invoice.sgst) }}</td></tr>
+                    <tr><td><strong>CGST 9%</strong></td><td style="text-align: right;">₹{{ "{:,.2f}".format(invoice.cgst) }}</td></tr>
+                    <tr><td><strong>Round off / Freight</strong></td><td style="text-align: right;">0</td></tr>
+                    <tr><td><strong>Grand Total</strong></td><td style="text-align: right; font-weight: bold;">₹{{ "{:,.2f}".format(invoice.total_amount) }}</td></tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <table class="amount-in-words" style="margin-top: 10px;">
+        <tr>
+            <td style="width: 50%; border: 1px solid black;"><strong>Vehicle No:</strong> ___________________</td>
+            <td style="width: 50%; border: 1px solid black;">Rupees {{ invoice.total_amount | int | number_to_words }} only</td>
+        </tr>
+    </table>
+
+    <div class="signature-box">
+        <div>
+            <strong>OUR BANK DETAILS</strong><br>
+            Bank Name : UNION BANK OF INDIA<br>
+            A/C No. : 54780514000101<br>
+            A/C Name : OMPS Engineering Industries<br>
+            IFSC Code : UBIN081042<br>
+            Branch : AVADI
+        </div>
+        <div style="text-align: center;">
+            <img src="{{ url_for('static', filename='images/stamp.png') }}" style="height: 80px;"><br>
+        </div>
+        <div style="text-align: center;">
+            Authorised Signatory
+        </div>
+    </div>
+
+    <div class="footer-contact">
+        Ph. 044 - 4853 397, 9884544409, 9884533309 | Email: ompsindustries@gmail.com
+    </div>
+    {% if request.args.get('auto_close') %}
+    <script>
+        setTimeout(function () {
+            window.location.href = "{{ url_for('create_invoice') }}";  // or url_for('invoices')
+        }, 10000);  // 10 seconds
+    </script>
+    {% endif %}
+</body>
+</html>

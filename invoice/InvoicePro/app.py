@@ -4,7 +4,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
-
+from datetime import datetime
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
@@ -100,3 +100,6 @@ with app.app_context():
         db.session.add(admin_user)
         db.session.commit()
         logging.info("Default admin user created with advanced features enabled")
+@app.context_processor
+def inject_today():
+    return {'today': datetime.now()}

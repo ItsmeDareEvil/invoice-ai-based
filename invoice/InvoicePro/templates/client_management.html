@@ -50,7 +50,9 @@
                         <i data-feather="users" size="24"></i>
                     </div>
                     <div>
-                        <h3 class="fw-bold mb-0">{{ clients.total if clients.pages else clients|length }}</h3>
+
+                        <h3 class="fw-bold mb-0">Showing {{ client_list|length }} of {{ clients.total }} clients
+</h3>
                         <p class="text-muted mb-0 small">Total Clients</p>
                     </div>
                 </div>
@@ -134,6 +136,7 @@
                             <option value="In Discussion">In Discussion</option>
                             <option value="Quoted">Quoted</option>
                             <option value="Closed">Closed</option>
+                            <option value="Payment">Payment</option>
                         </select>
                     </div>
                     
@@ -183,48 +186,123 @@
                 
                 <div class="text-muted small">
                     Showing {{ client_list|length }} clients
+
+
                 </div>
             </div>
 
-            <!-- Grid View -->
-             {% if client_list %}
-            <div id="gridViewContainer" class="row">
-                {% for client in client_list %}
-                    <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
-                        <!-- Client card HTML here -->
-                    </div>
-                {% endfor %}
-            </div>
+           <!-- Grid View -->
+                        <div id="gridViewContainer">
+                            {% if client_list|length > 0 %}
+                                {% for client in client_list %}
+                                    <div class="card glass-card p-3 mb-3">
+                                        <h5>{{ client.name }}</h5>
+                                        <p class="text-muted mb-1">{{ client.email }}</p>
+                                        <p class="small">{{ client.phone }}</p>
+                                        <p class="small">Type: {{ client.client_type }}</p>
+                                        <p class="small">Stage: {{ client.lead_stage }}</p>
+                                        <p class="small">Business: {{ client.total_business or "—" }}</p>
+                                        <p class="small">
+                                            Insights:
+                                            {% if client.id in client_insights %}
+                                                {{ client_insights[client.id].risk_level }} Risk
+                                            {% else %}
+                                                N/A
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <!-- Empty State -->
+                                    <div class="text-center py-5">
+                                        <i data-feather="users" size="64" class="text-muted mb-3"></i>
+                                        <h4 class="text-muted">No clients found</h4>
+                                        <p class="text-muted mb-4">
+                                            {% if search or client_type %}
+                                            Try adjusting your filters or add a new client.
+                                            {% else %}
+                                            Start by adding your first client to manage relationships and create invoices.
+                                            {% endif %}
+                                        </p>
+                                        <div class="d-flex gap-2 justify-content-center">
+                                            <a href="{{ url_for('create_client') }}" class="btn btn-primary glass-btn-primary">
+                                                <i data-feather="user-plus" class="me-1"></i> Add First Client
+                                            </a>
+                                            {% if search or client_type %}
+                                            <a href="{{ url_for('client_management') }}" class="btn btn-outline-secondary glass-btn">
+                                                <i data-feather="x" class="me-1"></i> Clear Filters
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                            {% endif %}
+                        </div>
 
-            <!-- List View -->
-            <div id="listViewContainer" style="display: none;">
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Client</th>
-                                <th>Contact</th>
-                                <th>Type</th>
-                                <th>Lead Stage</th>
-                                <th>Total Business</th>
-                                <th>AI Insights</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for client in client_list %}
-                                <tr>
-                                    <!-- List view HTML here -->
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
 
-        </div>
-    </div>
-</div>
+
+           <!-- List View -->
+                        <div id="listViewContainer" style="display: none;">
+                            {% if client_list|length > 0 %}
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Client</th>
+                                                <th>Contact</th>
+                                                <th>Type</th>
+                                                <th>Lead Stage</th>
+                                                <th>Total Business</th>
+                                                <th>AI Insights</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for client in client_list %}
+                                                <tr>
+                                                    <td>{{ client.name }}</td>
+                                                    <td>{{ client.email }}<br><small>{{ client.phone }}</small></td>
+                                                    <td>{{ client.client_type }}</td>
+                                                    <td>{{ client.lead_stage }}</td>
+                                                    <td>{{ client.total_business or "—" }}</td>
+                                                    <td>
+                                                        {% if client.id in client_insights %}
+                                                            {{ client_insights[client.id].risk_level }} Risk <br>
+                                                            LTV: {{ client_insights[client.id].predicted_ltv }}
+                                                        {% else %}
+                                                            N/A
+                                                        {% endif %}
+                                                    </td>
+                                                    <td><!-- future actions --></td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <!-- Empty State -->
+                                        <div class="text-center py-5">
+                                            <i data-feather="users" size="64" class="text-muted mb-3"></i>
+                                            <h4 class="text-muted">No clients found</h4>
+                                            <p class="text-muted mb-4">
+                                                {% if search or client_type %}
+                                                Try adjusting your filters or add a new client.
+                                                {% else %}
+                                                Start by adding your first client to manage relationships and create invoices.
+                                                {% endif %}
+                                            </p>
+                                            <div class="d-flex gap-2 justify-content-center">
+                                                <a href="{{ url_for('create_client') }}" class="btn btn-primary glass-btn-primary">
+                                                    <i data-feather="user-plus" class="me-1"></i> Add First Client
+                                                </a>
+                                                {% if search or client_type %}
+                                                <a href="{{ url_for('client_management') }}" class="btn btn-outline-secondary glass-btn">
+                                                    <i data-feather="x" class="me-1"></i> Clear Filters
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                            {% endif %}
+                        </div>
 
                 
                 <!-- Pagination -->
@@ -239,12 +317,12 @@
                         
                         {% for page_num in clients.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
                             {% if page_num %}
-                                {% if page_num != clients.page %}
-                                <li class="page-item">
-                                    <a class="page-link glass-btn" href="{{ url_for('client_management', page=page_num, search=search, type=client_type) }}">
-                                        {{ page_num }}
-                                    </a>
-                                </li>
+                                {%if page_num != clients.page %}
+                                    <li class="page-item">
+                                         <a class="page-link glass-btn" href="{{ url_for('client_management', page=page_num, search=search, type=client_type) }}">
+                                           {{ page_num }}
+                                      </a>
+                                    </li>
                                 {% else %}
                                 <li class="page-item active">
                                     <span class="page-link bg-primary border-primary">{{ page_num }}</span>
@@ -266,30 +344,9 @@
                 </nav>
                 {% endif %}
                 
-                {% else %}
-                <!-- Empty State -->
-                <div class="text-center py-5">
-                    <i data-feather="users" size="64" class="text-muted mb-3"></i>
-                    <h4 class="text-muted">No clients found</h4>
-                    <p class="text-muted mb-4">
-                        {% if search or client_type %}
-                        Try adjusting your filters or add a new client.
-                        {% else %}
-                        Start by adding your first client to manage relationships and create invoices.
-                        {% endif %}
-                    </p>
-                    <div class="d-flex gap-2 justify-content-center">
-                        <a href="{{ url_for('create_client') }}" class="btn btn-primary glass-btn-primary">
-                            <i data-feather="user-plus" class="me-1"></i> Add First Client
-                        </a>
-                        {% if search or client_type %}
-                        <a href="{{ url_for('client_management') }}" class="btn btn-outline-secondary glass-btn">
-                            <i data-feather="x" class="me-1"></i> Clear Filters
-                        </a>
-                        {% endif %}
-                    </div>
-                </div>
-                {% endif %}
+               
+                
+             
             </div>
         </div>
     </div>
