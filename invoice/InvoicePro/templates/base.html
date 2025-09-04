@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="auto">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -59,11 +59,28 @@
                             <i data-feather="trending-up" class="me-1"></i> Analytics
                         </a>
                     </li>
-                <li class="nav-item">
-                    <a class="nav-link {% if request.endpoint == 'delivery' %}active{% endif %}" href="{{ url_for('delivery') }}">
-                        <i data-feather="truck" class="me-1"></i> Delivery
-                    </a>
-                </li>
+                             <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle {% if request.endpoint in ['create_challan', 'delivery_challan'] %}active{% endif %}" 
+       href="#" id="navbarDelivery" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <i data-feather="truck" class="me-1"></i> Delivery
+    </a>
+    <ul class="dropdown-menu glass-card shadow-lg border-0" aria-labelledby="navbarDelivery">
+        <li>
+            <a class="dropdown-item {% if request.endpoint == 'create_challan' %}active{% endif %}" 
+               href="{{ url_for('create_challan') }}">
+                Create Challan
+            </a>
+        </li>
+        <li>
+            <a class="dropdown-item {% if request.endpoint == 'delivery_challan' %}active{% endif %}" 
+               href="{{ url_for('delivery_challan') }}">
+                View Challan
+            </a>
+        </li>
+    </ul>
+</li>
+
+
 
                     {% if ai_enabled %}
                     <li class="nav-item">
@@ -225,14 +242,28 @@
     {% block scripts %}{% endblock %}
     
     <script>
-        // Initialize Feather Icons
-        feather.replace();
-        
-        // Initialize tooltips
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
-        });
+   const themeToggle = document.getElementById("themeToggle");
+const themeIcon = document.getElementById("themeIcon");
+const root = document.documentElement; // <html>
+
+// Load saved theme on startup
+const savedTheme = localStorage.getItem("theme") || "light";
+root.setAttribute("data-theme", savedTheme);
+themeIcon.setAttribute("data-feather", savedTheme === "dark" ? "moon" : "sun");
+feather.replace();
+
+themeToggle.addEventListener("click", () => {
+  const currentTheme = root.getAttribute("data-theme") || "light";
+  const newTheme = currentTheme === "light" ? "dark" : "light";
+
+  root.setAttribute("data-theme", newTheme);
+  localStorage.setItem("theme", newTheme);
+
+  themeIcon.setAttribute("data-feather", newTheme === "dark" ? "moon" : "sun");
+  feather.replace();
+});
+
+
     </script>
 </body>
 </html>

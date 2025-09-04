@@ -4,12 +4,65 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Any, Optional
 from sqlalchemy import func, desc, and_, or_
 from collections import defaultdict
+from sqlalchemy import func, desc
+from models import Client, Invoice
+from app import db
 
 from app import db
 from models import Invoice, Client, InvoiceLineItem, User, AIInteraction, ExpenseTracking, InventoryItem
 
 class AnalyticsEngine:
     """Advanced analytics engine with AI-powered insights"""
+    def fetch_top_clients(limit=10):
+        query = (
+            db.session.query(
+                Client.id,
+                Client.name,
+                func.count(Invoice.id).label("invoice_count"),
+                func.sum(Invoice.amount).label("total_revenue"),
+                (func.sum(Invoice.amount) / func.count(Invoice.id)).label("avg_invoice_value")
+            )
+            .select_from(Invoice)
+            .join(Client, Invoice.client_id == Client.id)
+            .group_by(Client.id)
+            .order_by(desc("total_revenue"))
+            .limit(limit)
+        )
+
+        result = query.all()
+
+        top_clients = []
+        for r in result:
+            top_clients.append({
+                "name": r.name,
+                "total_revenue": r.total_revenue,
+                "invoice_count": r.invoice_count,
+                "avg_invoice_value": r.avg_invoice_value
+            })
+
+        return top_clients
+    def get_client_performance_metrics():
+        """
+        Returns client performance data for the analytics dashboard
+        """
+        client_performance = {
+            'top_clients': fetch_top_clients(),
+            'segments': {
+                'by_value': {'high_value': 0, 'medium_value': 0, 'low_value': 0}
+            },
+            'lifecycle': {
+                'stages': [
+                    {'stage': 'In Discussion', 'count': 0},
+                    {'stage': 'New', 'count': 0},
+                    {'stage': 'Quoted', 'count': 0}
+                ]
+            },
+            'risk_analysis': {
+                'risk_distribution': {'high_risk': 0, 'medium_risk': 0, 'low_risk': 0}
+            }
+        }
+        return client_performance
+
     
     def __init__(self):
         self.cache = {}

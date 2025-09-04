@@ -114,24 +114,32 @@
     <!-- Charts Section -->
     <div class="row mb-4">
         <!-- Revenue Trends -->
-        <div class="col-lg-8 mb-4">
-            <div class="glass-card p-4">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-bold mb-0">Revenue & Profit Trends</h5>
-                    <div class="chart-legend">
-                        <span class="legend-item"><span class="legend-color bg-primary"></span> Revenue</span>
-                        <span class="legend-item"><span class="legend-color bg-success"></span> Profit</span>
-                    </div>
-                </div>
-                <canvas id="revenueProfitChart" height="400"></canvas>
-            </div>
-        </div>
+<div class="col-lg-8 mb-4">
+  <div class="glass-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 class="fw-bold mb-0">Revenue & Profit Trends</h5>
+      <div class="chart-legend">
+        <span class="legend-item"><span class="legend-color bg-primary"></span> Revenue</span>
+        <span class="legend-item"><span class="legend-color bg-success"></span> Profit</span>
+      </div>
+    </div>
+
+    <!-- chart container -->
+    <div class="chart-container">
+      <canvas id="revenueProfitChart"></canvas>
+    </div>
+  </div>
+</div>
+
         
         <!-- Payment Status Distribution -->
         <div class="col-lg-4 mb-4">
             <div class="glass-card p-4">
                 <h5 class="fw-bold mb-3">Payment Status</h5>
-                <canvas id="paymentStatusChart" height="400"></canvas>
+                <div class="chart-container">
+  <canvas id="paymentStatusChart"></canvas>
+</div>
+
                 
                 <div class="payment-status-details mt-3">
                     {% if analytics_data.payment_analytics.payment_status_distribution %}
@@ -296,12 +304,15 @@
             </div>
         </div>
         
-        <div class="col-lg-4 mb-4">
-            <div class="glass-card p-4">
-                <h5 class="fw-bold mb-3">Client Distribution</h5>
-                <canvas id="clientTypeChart" height="300"></canvas>
-                
-                <div class="client-stats mt-3">
+     <div class="col-lg-4 mb-4">
+                <div class="glass-card p-4">
+                    <h5 class="fw-bold mb-3">Client Distribution</h5>
+
+                    <div class="chart-container">
+                    <canvas id="clientTypeChart"></canvas>
+                    </div>
+
+                    <div class="client-stats mt-3">
                     {% if analytics_data.client_performance.client_types %}
                     {% for type_data in analytics_data.client_performance.client_types %}
                     <div class="d-flex justify-content-between align-items-center mb-2">
@@ -310,9 +321,10 @@
                     </div>
                     {% endfor %}
                     {% endif %}
+                    </div>
                 </div>
-            </div>
         </div>
+
     </div>
     
     <!-- Blockchain Analytics (if enabled) -->

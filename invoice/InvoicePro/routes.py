@@ -505,7 +505,10 @@ def analytics():
                 analytics_data['blockchain_insights'] = blockchain_service.get_blockchain_stats()
             except Exception as e:
                 logging.error(f"Blockchain analytics failed: {e}")
-        
+        print("Client Performance Data:", analytics_data['client_performance'])
+        print("Full Analytics Data:", analytics_data)
+
+
         return render_template('analytics.html', analytics_data=analytics_data)
     
     except Exception as e:
@@ -543,9 +546,14 @@ def settings():
     
     return render_template('settings.html', settings_data=settings_data)
 
-@app.route("/delivery")
+@app.route("/create-challan")
 @login_required
-def delivery():
+def create_challan():
+    return render_template("create_challan.html")
+
+@app.route("/delivery-challan")
+@login_required
+def delivery_challan():
     return render_template("delivery_challan.html")
 
 

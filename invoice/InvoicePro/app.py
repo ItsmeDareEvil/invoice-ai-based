@@ -103,6 +103,4 @@ with app.app_context():
 @app.context_processor
 def inject_today():
     return {'today': datetime.now()}
-@app.route("/create-challan", endpoint="create_challan")
-def challan_page():
-    return render_template("create_challan.html")
+
