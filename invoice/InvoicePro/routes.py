@@ -2,7 +2,7 @@ import os
 import json
 import logging
 from datetime import datetime
-from flask import render_template, request, redirect, url_for, flash, jsonify, send_file, session, abort
+from flask import render_template, request, redirect, url_for, flash, jsonify, send_file, session, abort, Flask
 from werkzeug.utils import secure_filename
 from sqlalchemy import func, and_, or_, extract, desc
 from sqlalchemy.orm import joinedload
@@ -564,6 +564,17 @@ def crm():
 @login_required
 def create_reminder():
     return render_template('create_reminder.html', title='Create Reminder')
+
+
+@app.route('/api/export/excel')
+def export_excel():
+    # Example: You can dynamically generate the file or use a static file
+    # Get query params if needed
+    param1 = request.args.get('param1', '')
+    
+    # Path to your Excel file (can be generated dynamically)
+    file_path = 'data.xlsx'  # make sure this file exists
+    return send_file(file_path, as_attachment=True, download_name='data.xlsx')
 
 
 # API Routes for AJAX and Advanced Features

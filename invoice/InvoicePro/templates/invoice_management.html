@@ -422,9 +422,14 @@ function bulkExport() {
 }
 
 // Export functions
-function exportToExcel() {
-    window.location.href = '/api/export/excel?' + new URLSearchParams(window.location.search);
+function exportToExcel(event) {
+
+
+    const url = '/api/export/excel?' + new URLSearchParams(window.location.search).toString();
+    
+
 }
+
 
 function exportToPDF() {
     window.location.href = '/api/export/pdf?' + new URLSearchParams(window.location.search);
