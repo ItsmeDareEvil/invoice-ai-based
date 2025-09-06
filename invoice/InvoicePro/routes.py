@@ -18,7 +18,7 @@ from voice_service import voice_processor, voice_invoice_builder
 from analytics_engine import AnalyticsEngine
 
 # Initialize analytics engine
-analytics_engine = AnalyticsEngine()
+analytics_engine = AnalyticsEngine(db.session)
 
 def login_required(f):
     """Decorator to require login for routes"""
@@ -555,6 +555,15 @@ def create_challan():
 @login_required
 def delivery_challan():
     return render_template("delivery_challan.html")
+@app.route('/crm')
+@login_required
+def crm():
+    lead_stats = analytics_engine.get_lead_stats()  
+    return render_template('crm.html', title='CRM', lead_stats=lead_stats)
+@app.route('/create-reminder')
+@login_required
+def create_reminder():
+    return render_template('create_reminder.html', title='Create Reminder')
 
 
 # API Routes for AJAX and Advanced Features

@@ -1,0 +1,415 @@
+{% extends "base.html" %}
+
+{% block title %}CRM - Invoice Management System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-handshake me-2"></i>Customer Relationship Management
+            </h1>
+        </div>
+    </div>
+
+    <!-- Lead Statistics -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">New Leads</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ lead_stats.new }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-user-plus fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">In Discussion</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ lead_stats.discussion }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-comments fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Quoted</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ lead_stats.quoted }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-file-contract fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Closed</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ lead_stats.closed }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-handshake fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Follow-up and Recent Activity -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+    <h6 class="m-0 font-weight-bold text-primary">
+        <i class="fas fa-bell me-2"></i>Follow-up Reminders
+    </h6>
+</div>
+<div class="card-body">
+    {% if follow_ups %}
+        {% for reminder in follow_ups %}
+        <div class="d-flex align-items-center mb-3 p-2 border rounded">
+            <div class="flex-shrink-0">
+                <i class="fas fa-user-clock fa-2x text-warning"></i>
+            </div>
+            <div class="flex-grow-1 ms-3">
+                <h6 class="mb-1">{{ reminder.client.name }}</h6>
+                <p class="mb-1 text-muted small">
+                    Follow-up due: {{ reminder.reminder_date.strftime('%d-%m-%Y') }}
+                </p>
+                {% if reminder.note %}
+                <p class="mb-1 text-muted small">
+                    Note: {{ reminder.note }}
+                </p>
+                {% endif %}
+                <div class="btn-group btn-group-sm">
+                    <button class="btn btn-outline-primary" onclick="contactClientWhatsApp({{ reminder.client.id }})">
+                        <i class="fas fa-phone me-1"></i>Contact
+                    </button>
+                    <button class="btn btn-outline-success" onclick="markCompleteReminder({{ reminder.id }})">
+                        <i class="fas fa-check me-1"></i>Done
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="text-center py-3">
+            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+            <p class="text-muted">All caught up! No pending follow-ups.</p>
+        </div>
+    {% endif %}
+</div>
+
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-history me-2"></i>Recent Contacts
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if recent_contacts %}
+                        {% for client in recent_contacts %}
+                        <div class="d-flex align-items-center mb-3 p-2 border rounded">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-user fa-2x text-info"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">{{ client.name }}</h6>
+                                <p class="mb-1 text-muted small">
+                                    Last contact: {{ client.last_contact_date.strftime('%d-%m-%Y') if client.last_contact_date else 'N/A' }}
+                                </p>
+                                <span class="badge bg-{{ 'success' if client.lead_stage == 'Closed' else 'primary' if client.lead_stage == 'Quoted' else 'warning' if client.lead_stage == 'In Discussion' else 'info' }}">
+                                    {{ client.lead_stage }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-history fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">No recent contact history.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overdue Invoice Follow-up Reminder Section -->
+<div class="row">
+    <div class="col-12 mb-4">
+        <div class="card shadow border-start-danger border-3">
+            <div class="card-header py-3 d-flex align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Invoices Pending for 44+ Days
+                </h6>
+            </div>
+            <div class="card-body">
+                {% if overdue_invoices %}
+                    {% for invoice in overdue_invoices %}
+                        <div class="d-flex align-items-center mb-3 p-2 border rounded">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-file-invoice-dollar fa-2x text-danger"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="mb-1">{{ invoice.client.name }}</h6>
+                                <p class="mb-1 text-muted small">
+                                    Invoice #{{ invoice.invoice_number }} | Created on: {{ invoice.created_at.strftime('%d-%m-%Y') }}
+                                </p>
+                                <p class="mb-1">
+                                    <strong>Status:</strong> {{ invoice.payment_status }}
+                                </p>
+                                <a href="{{ url_for('invoice_detail', id=invoice.id) }}" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-eye me-1"></i>View Invoice
+                                </a>
+                                <a href="mailto:{{ invoice.client.email }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-envelope me-1"></i>Email Client
+                                </a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No overdue invoices beyond 44 days. You're all caught up!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <!-- Lead Funnel -->
+    <div class="row">
+        <div class="col-12 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-funnel-dollar me-2"></i>Lead Funnel
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <div class="p-3 border rounded bg-light">
+                                <i class="fas fa-user-plus fa-3x text-info mb-2"></i>
+                                <h4>{{ lead_stats.new }}</h4>
+                                <p class="text-muted">New Leads</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 border rounded bg-light">
+                                <i class="fas fa-comments fa-3x text-warning mb-2"></i>
+                                <h4>{{ lead_stats.discussion }}</h4>
+                                <p class="text-muted">In Discussion</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 border rounded bg-light">
+                                <i class="fas fa-file-contract fa-3x text-primary mb-2"></i>
+                                <h4>{{ lead_stats.quoted }}</h4>
+                                <p class="text-muted">Quoted</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 border rounded bg-light">
+                                <i class="fas fa-handshake fa-3x text-success mb-2"></i>
+                                <h4>{{ lead_stats.closed }}</h4>
+                                <p class="text-muted">Closed Won</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <div class="progress" style="height: 20px;">
+                            {% set total_leads = lead_stats.new + lead_stats.discussion + lead_stats.quoted + lead_stats.closed %}
+                            {% if total_leads > 0 %}
+                                <div class="progress-bar bg-info" style="width: {{ (lead_stats.new / total_leads * 100) }}%">New</div>
+                                <div class="progress-bar bg-warning" style="width: {{ (lead_stats.discussion / total_leads * 100) }}%">Discussion</div>
+                                <div class="progress-bar bg-primary" style="width: {{ (lead_stats.quoted / total_leads * 100) }}%">Quoted</div>
+                                <div class="progress-bar bg-success" style="width: {{ (lead_stats.closed / total_leads * 100) }}%">Closed</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clients and Reminders -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-users me-2"></i>Clients
+                    </h6>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    {% if clients %}
+                        <ul class="list-group">
+                            {% for client in clients %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                {{ client.name }}
+                                <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addReminderModal" data-client-id="{{ client.id }}" data-client-name="{{ client.name }}">
+                                    <i class="fas fa-bell"></i> Add Reminder
+                                </button>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No clients found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-bell me-2"></i>Reminders
+                    </h6>
+                </div>
+                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                    {% if reminders %}
+                        <ul class="list-group">
+                            {% for reminder in reminders %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ reminder.client.name }}</strong> - {{ reminder.reminder_type }}<br>
+                                    <small class="text-muted">{{ reminder.reminder_date.strftime('%d-%m-%Y %H:%M') }}</small><br>
+                                    <small>{{ reminder.notes }}</small>
+                                </div>
+                                {% if reminder.status == 'Pending' %}
+                                <form method="POST" action="{{ url_for('complete_reminder', id=reminder.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-success">Mark Completed</button>
+                                </form>
+                                {% else %}
+                                <span class="badge bg-success">Completed</span>
+                                {% endif %}
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No reminders found.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Reminder Modal -->
+<div class="modal fade" id="addReminderModal" tabindex="-1" aria-labelledby="addReminderModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form method="POST" action="{{ url_for('create_reminder') }}">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addReminderModalLabel">Add Reminder</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" name="client_id" id="reminderClientId" value="">
+                <div class="mb-3">
+                    <label for="reminderType" class="form-label">Reminder Type</label>
+                    <select class="form-select" id="reminderType" name="reminder_type" required>
+                        <option value="">Select type</option>
+                        <option value="Follow-up">Follow-up</option>
+                        <option value="Payment">Payment</option>
+                        <option value="Quotation">Quotation</option>
+                        <option value="Meeting">Meeting</option>
+                        <option value="Auditor Work">Auditor Work</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="reminderDate" class="form-label">Reminder Date & Time</label>
+                    <input type="datetime-local" class="form-control" id="reminderDate" name="reminder_date" required>
+                </div>
+                <div class="mb-3">
+                    <label for="reminderNotes" class="form-label">Notes</label>
+                    <textarea class="form-control" id="reminderNotes" name="notes" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Create Reminder</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </form>
+  </div>
+</div>
+
+<script>
+var addReminderModal = document.getElementById('addReminderModal');
+addReminderModal.addEventListener('show.bs.modal', function (event) {
+  var button = event.relatedTarget;
+  var clientId = button.getAttribute('data-client-id');
+  var clientName = button.getAttribute('data-client-name');
+  var modalTitle = addReminderModal.querySelector('.modal-title');
+  var clientIdInput = addReminderModal.querySelector('#reminderClientId');
+  
+  modalTitle.textContent = 'Add Reminder for ' + clientName;
+  clientIdInput.value = clientId;
+});
+</script>
+
+<script>
+
+function markCompleteReminder(reminderId) {
+    // Create a form programmatically
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/reminder/${reminderId}/complete`;
+    document.body.appendChild(form);
+    form.submit();
+}
+function contactClientWhatsApp(clientId) {
+    fetch('/api/contact_client_whatsapp', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ client_id: clientId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('WhatsApp message sent successfully!');
+        } else {
+            alert('Failed to send message: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error sending WhatsApp message:', error);
+        alert('Something went wrong while sending the message.');
+    });
+}
+</script>
+{% endblock %}

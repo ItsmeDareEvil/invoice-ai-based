@@ -7,7 +7,7 @@ from collections import defaultdict
 from sqlalchemy import func, desc
 from models import Client, Invoice
 from app import db
-
+from models import Client
 from app import db
 from models import Invoice, Client, InvoiceLineItem, User, AIInteraction, ExpenseTracking, InventoryItem
 
@@ -763,3 +763,31 @@ class AnalyticsEngine:
             logging.error(f"Similarity calculation failed: {e}")
             return 0.0
 
+    def __init__(self, db_session):
+        self.db_session = db_session
+
+    # Existing methods ...
+
+    def get_lead_stats(self):
+        
+ 
+        results = (
+            self.db_session.query(Client.lead_stage, func.count(Client.id))
+            .group_by(Client.lead_stage)
+            .all()
+        )
+
+        stats = {"new": 0, "discussion": 0, "quoted": 0, "closed": 0}
+
+        for stage, count in results:
+            stage_lower = stage.lower() if stage else "new"
+            if "new" in stage_lower:
+                stats["new"] = count
+            elif "discussion" in stage_lower:
+                stats["discussion"] = count
+            elif "quote" in stage_lower:
+                stats["quoted"] = count
+            elif "closed" in stage_lower:
+                stats["closed"] = count
+
+        return stats
