@@ -178,12 +178,9 @@
 
 /* Primary glass button */
 .glass-btn-primary {
-  background: var(--primary-gradient);
+  background-color: #28A745; /* match screenshot */
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 
-    0 4px 16px rgba(102, 126, 234, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid #218838; /* slightly darker for border */
 }
 
 .glass-btn-primary:hover {
