@@ -30,21 +30,26 @@
                                 <button class="btn btn-outline-secondary glass-btn dropdown-toggle" data-bs-toggle="dropdown">
                                     <i data-feather="download" class="me-1"></i> Export
                                 </button>
-                                <ul class="dropdown-menu glass-dropdown">
-                                    <li><a class="dropdown-item" href="#" onclick="exportToExcel()">
-                                        <i data-feather="file-text" class="me-2"></i> Excel
-                                    </a></li>
-                                    <li><a class="dropdown-item" href="#" onclick="exportToPDF()">
-                                        <i data-feather="file" class="me-2"></i> PDF Report
-                                    </a></li>
-                                </ul>
+<ul class="dropdown-menu glass-dropdown">
+    <li>
+        <a class="dropdown-item" href="#" onclick="exportToExcel(event)">
+            <i data-feather="file-text" class="me-2"></i> Excel
+        </a>
+    </li>
+    <li>
+    <a class="dropdown-item" href="#" onclick="exportToPDF(event)">
+        <i data-feather="file" class="me-2"></i> PDF Report
+    </a>
+    </li>
+</ul>
+
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </div><br>
     
     <!-- Advanced Filters -->
     <div class="row mb-4">
@@ -108,7 +113,7 @@
             </div>
         </div>
     </div>
-    
+    <br>
     <!-- Invoice List -->
     <div class="row">
         <div class="col-12">
@@ -423,16 +428,25 @@ function bulkExport() {
 
 // Export functions
 function exportToExcel(event) {
-
+    event.preventDefault();
 
     const url = '/api/export/excel?' + new URLSearchParams(window.location.search).toString();
-    
 
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = "invoices.xlsx"; // suggest filename
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 }
 
 
-function exportToPDF() {
-    window.location.href = '/api/export/pdf?' + new URLSearchParams(window.location.search);
+function exportToPDF(event) {
+    event.preventDefault();
+
+    const url = '/api/export/pdf?' + new URLSearchParams(window.location.search).toString();
+
+    window.location.href = url;
 }
 
 // Delete invoice

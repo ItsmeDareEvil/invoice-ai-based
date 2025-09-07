@@ -16,6 +16,7 @@ from blockchain_service import blockchain_service, smart_contract_manager
 from ocr_service import ocr_processor, receipt_processor
 from voice_service import voice_processor, voice_invoice_builder
 from analytics_engine import AnalyticsEngine
+from reportlab.pdfgen import canvas
 
 # Initialize analytics engine
 analytics_engine = AnalyticsEngine(db.session)
@@ -566,15 +567,58 @@ def create_reminder():
     return render_template('create_reminder.html', title='Create Reminder')
 
 
-@app.route('/api/export/excel')
+from flask import send_file, request
+import io
+import pandas as pd
+
+@app.route("/api/export/excel")
 def export_excel():
-    # Example: You can dynamically generate the file or use a static file
-    # Get query params if needed
-    param1 = request.args.get('param1', '')
-    
-    # Path to your Excel file (can be generated dynamically)
-    file_path = 'data.xlsx'  # make sure this file exists
-    return send_file(file_path, as_attachment=True, download_name='data.xlsx')
+    # Example: create a DataFrame (replace with your actual query)
+    data = [
+        {"Invoice": 1, "Client": "ABC Corp", "Amount": 500},
+        {"Invoice": 2, "Client": "XYZ Ltd", "Amount": 750},
+    ]
+    df = pd.DataFrame(data)
+
+    # Save Excel file in memory
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine="xlsxwriter") as writer:
+        df.to_excel(writer, index=False, sheet_name="Invoices")
+
+    output.seek(0)
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name="invoices.xlsx",
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+
+
+@app.route("/api/export/pdf")
+def export_pdf():
+    from io import BytesIO
+    buffer = BytesIO()
+
+    # Create a PDF with reportlab
+    p = canvas.Canvas(buffer)
+    p.drawString(100, 750, "Invoice Report")
+    p.drawString(100, 730, "Client: ABC Corp")
+    p.drawString(100, 710, "Amount: $500")
+    p.showPage()
+    p.save()
+
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name="invoices.pdf",
+        mimetype="application/pdf"
+    )
+
+
 
 
 # API Routes for AJAX and Advanced Features
