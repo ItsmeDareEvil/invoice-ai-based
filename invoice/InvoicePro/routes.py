@@ -17,6 +17,7 @@ from ocr_service import ocr_processor, receipt_processor
 from voice_service import voice_processor, voice_invoice_builder
 from analytics_engine import AnalyticsEngine
 from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
 
 # Initialize analytics engine
 analytics_engine = AnalyticsEngine(db.session)
@@ -471,6 +472,72 @@ def create_client():
             flash(f'Error creating client: {str(e)}', 'error')
     
     return render_template('create_client.html')
+
+@app.route('/api/export/clients/excel')
+@login_required
+def export_clients_excel():
+    clients = Client.query.order_by(Client.name).all()
+
+    client_data = [{
+        'ID': c.id,
+        'Name': c.name,
+        'Email': c.email,
+        'Phone': c.phone,
+        'Type': c.client_type,
+        'Lead Stage': c.lead_stage,
+        'Total Business': c.total_business,
+        'Risk Score': c.ai_risk_score,
+        'Predicted LTV': c.predicted_ltv,
+        'Verified': c.blockchain_verified,
+    } for c in clients]
+
+    df = pd.DataFrame(client_data)
+
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name='Clients')
+    output.seek(0)
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name='clients.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
+@app.route('/api/export/clients/pdf')
+@login_required
+def export_clients_pdf():
+    clients = Client.query.order_by(Client.name).all()
+
+    output = io.BytesIO()
+    p = canvas.Canvas(output, pagesize=letter)
+    width, height = letter
+
+    y = height - 50
+    p.setFont("Helvetica-Bold", 14)
+    p.drawString(50, y, "Client List")
+    y -= 30
+
+    p.setFont("Helvetica", 10)
+    for client in clients:
+        line = f"{client.id} - {client.name} - {client.email} - {client.phone} - {client.client_type}"
+        p.drawString(50, y, line)
+        y -= 15
+        if y < 50:
+            p.showPage()
+            y = height - 50
+            p.setFont("Helvetica", 10)
+
+    p.save()
+    output.seek(0)
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name='clients.pdf',
+        mimetype='application/pdf'
+    )
 
 @app.route('/analytics')
 @login_required

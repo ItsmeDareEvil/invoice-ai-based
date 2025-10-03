@@ -26,24 +26,7 @@
                                 <i data-feather="mic" class="me-1"></i> Voice Create
                             </button>
                             {% endif %}
-                            <div class="dropdown">
-                                <button class="btn btn-outline-secondary glass-btn dropdown-toggle" data-bs-toggle="dropdown">
-                                    <i data-feather="download" class="me-1"></i> Export
-                                </button>
-<ul class="dropdown-menu glass-dropdown">
-    <li>
-        <a class="dropdown-item" href="#" onclick="exportToExcel(event)">
-            <i data-feather="file-text" class="me-2"></i> Excel
-        </a>
-    </li>
-    <li>
-    <a class="dropdown-item" href="#" onclick="exportToPDF(event)">
-        <i data-feather="file" class="me-2"></i> PDF Report
-    </a>
-    </li>
-</ul>
-
-                            </div>
+                        
                         </div>
                     </div>
                 </div>
@@ -424,29 +407,6 @@ function bulkExport() {
     
     // Implement bulk export
     console.log('Bulk export:', selectedIds);
-}
-
-// Export functions
-function exportToExcel(event) {
-    event.preventDefault();
-
-    const url = '/api/export/excel?' + new URLSearchParams(window.location.search).toString();
-
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = "invoices.xlsx"; // suggest filename
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
-
-
-function exportToPDF(event) {
-    event.preventDefault();
-
-    const url = '/api/export/pdf?' + new URLSearchParams(window.location.search).toString();
-
-    window.location.href = url;
 }
 
 // Delete invoice
