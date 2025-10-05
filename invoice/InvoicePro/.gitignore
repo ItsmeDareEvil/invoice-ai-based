@@ -1,0 +1,11 @@
+# Python cache files
+_pycache_/
+*.pyc
+
+# Database file
+instance/revolutionary_invoice.db
+
+# Optional: IDE/system files
+*.idea/
+*.vscode/
+*.DS_Store
