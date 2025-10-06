@@ -17,7 +17,8 @@
   --danger: #dc2626;
   --info: #2563eb;
 
-  --text-primary: #111827;
+  --text-primary-dark: #111827;
+  --text-primary-light: rgb(255, 255, 255);
   --text-secondary: #374151;
 
   /* Gradients */
@@ -39,6 +40,92 @@
   --glass-shadow: rgba(0, 0, 0, 0.6);
 
   --primary-gradient: linear-gradient(135deg, #1E56A0 0%, #164183 100%);
+
+  .text-primary { color:white!important; }
+  .text-success { color: #86efac !important; }
+  .text-warning { color: #fde68a !important; }
+  .text-danger { color: #fca5a5 !important; }
+  .text-info { color: #93c5fd !important; }
+
+
+  .btn {color:white!important;}
+  .glass-card {
+    color: var(--text-primary-light);
+    background-color: var(--card-bg);
+  }
+
+  .glass-card .text-start{
+    color: var(--text-primary-light);
+    background-color: var(--card-bg);
+  }
+
+  .text-muted{
+    color: var(--text-primary-light) !important;
+  }
+
+  .glass-footer{
+    color: var(--text-primary-light);
+    background-color: var(--card-bg);
+  }
+  thead tr th ,tbody tr td{
+    color: var(--text-primary-light);
+    background-color: var(--text-primary-dark);
+  }
+/* navbar */
+.bg-gradient{
+  background-color:var(--body-bg);
+}
+  .sidebar{
+    background-color:var(--body-bg);
+  }
+  .dropdown-item{
+    color: var(--text-primary-light);
+
+  }
+  .dropdown-item:hover{
+    color: var(--text-primary-dark);
+  }
+
+
+  /* create_client */
+
+  .glass-input{
+    color: var(--text-primary-light) !important;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+  .glass-input:focus {
+  background: var(--glass-bg-strong);
+  border-color: var(--text-primary-light);
+  box-shadow: 
+    0 0 0 3px var(--text-primary-light);
+}
+
+
+/* CRM */
+
+.row{
+  color: var(--text-primary-light);
+  
+}
+.card{
+  background: var(--card-bg);
+}
+.border{
+  background-color: var(--body-bg) !important;
+}
+
+
+
+/*  AI Assistant*/
+
+.message-bubble{
+  color: var(--text-primary-light);
+}
+
+
 }
 
 body {
@@ -206,6 +293,7 @@ body {
   box-shadow: 0 8px 24px var(--glass-shadow);
   border-color: rgba(255, 255, 255, 0.4);
   background: var(--glass-bg-strong);
+  color: var(--text-primary-dark);
 }
 
 .glass-btn:active {
