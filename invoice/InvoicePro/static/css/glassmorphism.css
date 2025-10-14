@@ -79,7 +79,7 @@
     background-color:var(--body-bg);
   }
   .dropdown-item{
-    color: var(--text-primary-light);
+    color: var(--text-primary-light) !important;
 
   }
   .dropdown-item:hover{
