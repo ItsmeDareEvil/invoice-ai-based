@@ -82,16 +82,18 @@
                         <input type="date" class="form-control glass-input" id="date_to" name="date_to" value="{{ date_to }}">
                     </div>
                     
-                    <div class="col-md-1">
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary glass-btn" title="Filter">
-                                <i data-feather="filter" size="16"></i>
-                            </button>
-                            <a href="{{ url_for('invoice_management') }}" class="btn btn-outline-secondary glass-btn" title="Clear">
-                                <i data-feather="x" size="16"></i>
-                            </a>
-                        </div>
-                    </div>
+<div class="col-md-1">
+    <div class="d-flex gap-2 align-items-center">
+        <button type="submit" class="btn btn-primary glass-btn" title="Filter">
+            <i data-feather="filter" size="14"></i>
+        </button>
+        <a href="{{ url_for('invoice_management') }}" class="btn btn-outline-secondary glass-btn" title="Clear">
+            <i data-feather="x" size="12"></i>
+        </a>
+    </div>
+</div>
+
+
                 </form>
             </div>
         </div>

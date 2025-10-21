@@ -79,7 +79,7 @@
     background-color:var(--body-bg);
   }
   .dropdown-item{
-    color: var(--text-primary-light);
+    color: var(--text-primary-light) !important;
 
   }
   .dropdown-item:hover{
@@ -260,7 +260,7 @@ body {
   box-shadow: 0 4px 24px var(--glass-shadow);
 }
 
-/* Glass buttons */
+ Glass buttons 
 .glass-btn {
   background: var(--glass-bg);
   backdrop-filter: var(--backdrop-filter);
@@ -271,30 +271,70 @@ body {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  z-index: 0;
 }
+.glass-btn i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.d-flex.gap-2 {
+  align-items: center;
+   gap: 8px !important;  /* aligns both buttons in the same row vertically */
+}
+
+button.glass-btn,
+a.glass-btn {
+  display: inline-flex;           /* keeps your button design intact */
+  align-items: center;            /* centers icon vertically */
+  justify-content: center;        /* centers icon horizontally */
+}
+
+.glass-btn i svg {
+  width: 16px;
+  height: 16px;
+  display: block;       /* removes inline SVG spacing issues */
+}
+.btn.glass-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.6rem;   /* makes both equal in height/width */
+  line-height: 1;            /* removes extra spacing inside outline button */
+  height: 38px;              /* optional: ensures equal height */
+}
+
+
+.glass-btn[title="Clear"] i svg {
+  transform: scale(0.9); /* makes the "x" icon slightly smaller */
+}
+
 
 .glass-btn::before {
   content: '';
   position: absolute;
   top: 0;
-  left: -100%;
-  width: 100%;
+ width: 120%;  /* or slightly less than 100%, experiment */
+  left: -150%;
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
   transition: left 0.5s;
 }
 
 .glass-btn:hover::before {
-  left: 100%;
+  left: 10%;
 }
-
 .glass-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px var(--glass-shadow);
+  transform: translateY(-8px);
+  box-shadow: 0 8px 15px var(--glass-shadow);
   border-color: rgba(255, 255, 255, 0.4);
   background: var(--glass-bg-strong);
   color: var(--text-primary-dark);
+  z-index: 1; /* ✅ lifts only the hovered button, not its neighbor */
 }
+
 
 .glass-btn:active {
   transform: translateY(0);

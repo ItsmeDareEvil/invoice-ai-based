@@ -79,24 +79,34 @@
                     <i data-feather="trending-up" class="me-2"></i> Analytics
                 </a>
             </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle {% if request.endpoint in ['create_challan', 'delivery_challan'] %}active{% endif %}" 
-                   href="#" id="navbarDelivery" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i data-feather="truck" class="me-2"></i> Delivery
-                </a>
-                <ul class="dropdown-menu glass-card shadow-lg border-0" aria-labelledby="navbarDelivery">
-                    <li>
-                        <a class="dropdown-item {% if request.endpoint == 'create_challan' %}active{% endif %}" href="{{ url_for('create_challan') }}">
-                            Create Challan
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item {% if request.endpoint == 'delivery_challan' %}active{% endif %}" href="{{ url_for('delivery_challan') }}">
-                            View Challan
-                        </a>
-                    </li>
-                </ul>
-            </li>
+           <li class="nav-item">
+  <a class="nav-link d-flex justify-content-between align-items-center"
+     data-bs-toggle="collapse"
+     href="#deliveryMenu"
+     role="button"
+     aria-expanded="false"
+     aria-controls="deliveryMenu">
+    <span><i data-feather="truck" class="me-1"></i> Delivery</span>
+    <i data-feather="chevron-down" class="ms-auto"></i>
+  </a>
+  <div class="collapse ps-4" id="deliveryMenu">
+    <ul class="nav flex-column">
+      <li class="nav-item">
+        <a class="nav-link {% if request.endpoint == 'create_challan' %}active{% endif %}"
+           href="{{ url_for('create_challan') }}">
+          Create Challan
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if request.endpoint == 'delivery_challan' %}active{% endif %}"
+           href="{{ url_for('delivery_challan') }}">
+          View Challan
+        </a>
+      </li>
+    </ul>
+  </div>
+</li>
+
 
             {% if ai_enabled %}
             <li>
