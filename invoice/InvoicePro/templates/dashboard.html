@@ -38,7 +38,7 @@
     <!-- Key Metrics -->
     <div class="row mb-4">
         <div class="col-md-3">
-            <div class="glass-card p-4 metric-card">
+            <div class="glass-card p-4 metric-card card-green">
                 <div class="d-flex align-items-center">
                     <div class="metric-icon bg-success bg-opacity-10 text-success rounded-circle p-3 me-3">
                         <i data-feather="dollar-sign" size="24"></i>
@@ -55,15 +55,15 @@
         </div>
         
         <div class="col-md-3">
-            <div class="glass-card p-4 metric-card">
+            <div class="glass-card p-4 metric-card card-blue">
                 <div class="d-flex align-items-center">
-                    <div class="metric-icon bg-warning bg-opacity-10 text-warning rounded-circle p-3 me-3">
+                    <div class="metric-icon bg-info bg-opacity-10 text-info rounded-circle p-3 me-3">
                         <i data-feather="clock" size="24"></i>
                     </div>
                     <div>
                         <p class="text-muted mb-1 small">Outstanding</p>
                         <h3 class="fw-bold mb-0">₹{{ "%.2f"|format(outstanding_amount) }}</h3>
-                        <small class="text-warning">
+                        <small class="text-info">
                             <i data-feather="alert-circle" size="14"></i> Needs attention
                         </small>
                     </div>
@@ -72,15 +72,15 @@
         </div>
         
         <div class="col-md-3">
-            <div class="glass-card p-4 metric-card">
+            <div class="glass-card p-4 metric-card card-orange">
                 <div class="d-flex align-items-center">
-                    <div class="metric-icon bg-info bg-opacity-10 text-info rounded-circle p-3 me-3">
+                    <div class="metric-icon bg-warning bg-opacity-10 text-warning rounded-circle p-3 me-3">
                         <i data-feather="file-text" size="24"></i>
                     </div>
                     <div>
                         <p class="text-muted mb-1 small">Total Invoices</p>
                         <h3 class="fw-bold mb-0">{{ total_invoices }}</h3>
-                        <small class="text-info">
+                        <small class="text-warning">
                             <i data-feather="file" size="14"></i> {{ recent_invoices|length }} recent
                         </small>
                     </div>
@@ -89,15 +89,15 @@
         </div>
         
         <div class="col-md-3">
-            <div class="glass-card p-4 metric-card">
+            <div class="glass-card p-4 metric-card card-red">
                 <div class="d-flex align-items-center">
-                    <div class="metric-icon bg-primary bg-opacity-10 text-primary rounded-circle p-3 me-3">
+                    <div class="metric-icon bg-danger bg-opacity-10 text-danger rounded-circle p-3 me-3">
                         <i data-feather="users" size="24"></i>
                     </div>
                     <div>
                         <p class="text-muted mb-1 small">Active Clients</p>
                         <h3 class="fw-bold mb-0">{{ total_clients }}</h3>
-                        <small class="text-primary">
+                        <small class="text-danger">
                             <i data-feather="user-check" size="14"></i> All verified
                         </small>
                     </div>
