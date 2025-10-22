@@ -67,7 +67,7 @@
                                         </option>
                                         {% endfor %}
                                     </select>
-                                    <a href="{{ url_for('create_client') }}" class="btn btn-outline-primary" target="_blank">
+                                    <a href="{{ url_for('create_client') }}" class="btn btn-outline-primary" >
                                         <i data-feather="user-plus" size="16"></i>
                                     </a>
                                 </div>
@@ -387,6 +387,49 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     {% endif %}
 });
+
+//invoice saving 
+document.getElementById("saveInvoiceBtn").addEventListener("click", function (event) {
+  event.preventDefault();
+
+  const form = document.querySelector("form");
+  const btn = this;
+  const formData = new FormData(form);
+
+  btn.disabled = true;
+  btn.innerHTML = '<i data-feather="loader" class="me-1 spin"></i> Saving...';
+  feather.replace();
+
+  fetch(form.action, {
+    method: form.method,
+    body: formData,
+    headers: { "X-Requested-With": "XMLHttpRequest" } // 🔑 so Flask knows it's AJAX
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+       window.location.href = data.invoice_url; // redirect in same tab
+
+        form.reset();
+        alert("Invoice saved successfully!");
+      } else {
+        alert("Error: " + (data.error || "Could not save invoice."));
+      }
+    })
+    .catch(err => {
+      alert("Unexpected error: " + err);
+    })
+    .finally(() => {
+      btn.disabled = false;
+      btn.innerHTML = '<i data-feather="save" class="me-1"></i> Save Invoice';
+      feather.replace();
+    });
+});
+
+
+
+
+
 
 function initializeInvoiceForm() {
     // Add item button

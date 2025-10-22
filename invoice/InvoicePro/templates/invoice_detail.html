@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+
     <title>Proforma Invoice {{ invoice.invoice_number }}</title>
     <style>
         body {
@@ -196,5 +200,10 @@
         }, 10000);  // 10 seconds
     </script>
     {% endif %}
+ <a href="{{ url_for('create_invoice') }}" class="btn btn-outline-secondary mt-3">
+    <i data-feather="arrow-left"></i> Back
+</a>
+
+
 </body>
 </html>

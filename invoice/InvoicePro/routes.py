@@ -197,7 +197,6 @@ def invoice_management():
                          date_from=date_from,
                          date_to=date_to,
                          ai_insights=ai_invoice_insights)
-
 @app.route('/create_invoice', methods=['GET', 'POST'])
 @login_required
 def create_invoice():
@@ -210,14 +209,14 @@ def create_invoice():
             due_date_str = request.form.get('due_date')
             notes = request.form.get('notes', '')
             terms_conditions = request.form.get('terms_conditions', '')
-            
+
             # Parse dates
             invoice_date = datetime.strptime(invoice_date_str, '%Y-%m-%d').date() if invoice_date_str else datetime.now().date()
             due_date = datetime.strptime(due_date_str, '%Y-%m-%d').date() if due_date_str else None
-            
+
             # Generate invoice number
             invoice_number = generate_invoice_number()
-            
+
             # Create invoice
             invoice = Invoice(
                 invoice_number=invoice_number,
@@ -229,23 +228,23 @@ def create_invoice():
                 ai_generated=request.form.get('ai_generated') == 'true',
                 voice_command_created=request.form.get('voice_created') == 'true'
             )
-            
+
             db.session.add(invoice)
             db.session.flush()
-            
+
             # Process line items
             line_items_data = json.loads(request.form.get('line_items', '[]'))
             subtotal = 0
             total_tax = 0
-            
+
             for i, item_data in enumerate(line_items_data, 1):
                 quantity = float(item_data['quantity'])
                 unit_price = float(item_data['unit_price'])
                 tax_percentage = float(item_data.get('tax_percentage', 18.0))
-                
+
                 line_total = quantity * unit_price
                 tax_amount = (line_total * tax_percentage) / 100
-                
+
                 line_item = InvoiceLineItem(
                     invoice_id=invoice.id,
                     sr_no=i,
@@ -260,32 +259,30 @@ def create_invoice():
                     cost_price=float(item_data.get('cost_price', 0)),
                     ai_suggested=item_data.get('ai_suggested', False)
                 )
-                
+
                 db.session.add(line_item)
                 subtotal += line_total
                 total_tax += tax_amount
-            
+
             # Calculate taxes based on client location
             client = Client.query.get(client_id)
             company = Company.query.first()
-            
+
             if client and company and client.state == company.state:
-                # Same state - CGST + SGST
                 invoice.cgst = total_tax / 2
                 invoice.sgst = total_tax / 2
                 invoice.igst = 0
             else:
-                # Different state - IGST
                 invoice.igst = total_tax
                 invoice.cgst = 0
                 invoice.sgst = 0
-            
+
             invoice.subtotal = subtotal
             invoice.total_amount = subtotal + total_tax
-            
-            # Generate QR code for payments
+
+            # Generate QR code
             invoice.qr_payment_code = generate_payment_qr_code(invoice)
-            
+
             # AI risk assessment
             if app.config.get("AI_FEATURES_ENABLED") and ai_assistant:
                 try:
@@ -294,8 +291,8 @@ def create_invoice():
                     invoice.predicted_payment_date = predict_payment_date(invoice, risk_assessment)
                 except Exception as e:
                     logging.error(f"AI risk assessment failed: {e}")
-            
-            # Add to blockchain if enabled
+
+            # Blockchain
             if app.config.get("BLOCKCHAIN_ENABLED") and blockchain_service:
                 try:
                     blockchain_hash = blockchain_service.add_invoice_to_blockchain(invoice)
@@ -303,33 +300,40 @@ def create_invoice():
                         logging.info(f"Invoice {invoice_number} added to blockchain")
                 except Exception as e:
                     logging.error(f"Blockchain addition failed: {e}")
-            
+
             db.session.commit()
-            
+
+            invoice_url = url_for('invoice_detail', id=invoice.id)
+
+            # 🆕 Return JSON if AJAX
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return jsonify(success=True, invoice_url=invoice_url)
+
             flash('AI-powered invoice created successfully!', 'success')
-            return redirect(url_for('invoice_detail', id=invoice.id))
-            
+            return redirect(invoice_url)
+
         except Exception as e:
             db.session.rollback()
             logging.error(f"Invoice creation failed: {e}")
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                return jsonify(success=False, error=str(e))
             flash(f'Error creating invoice: {str(e)}', 'error')
-    
-    # GET request - show form
+
+    # GET request
     clients = Client.query.order_by(Client.name).all()
-    
-    # AI suggestions for new invoice
     ai_suggestions = {}
     client_id = request.args.get('client_id')
+
     if client_id and app.config.get("AI_FEATURES_ENABLED") and ai_assistant:
         try:
             ai_suggestions = ai_assistant.suggest_invoice_items(int(client_id))
         except Exception as e:
             logging.error(f"AI suggestions failed: {e}")
-    
+
     return render_template('create_invoice.html',
-                         clients=clients,
-                         ai_suggestions=ai_suggestions,
-                         today=datetime.now())
+                           clients=clients,
+                           today=datetime.now())
+
 
 @app.route('/invoice/<int:id>')
 @login_required

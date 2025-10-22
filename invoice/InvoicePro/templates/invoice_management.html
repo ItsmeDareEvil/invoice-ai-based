@@ -34,64 +34,78 @@
         </div>
     </div><br>
     
-    <!-- Advanced Filters -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="glass-card p-4">
-                <form method="GET" class="row g-3 align-items-end">
-                    <div class="col-md-3">
-                        <label for="search" class="form-label">Search</label>
-                        <div class="input-group">
-                            <span class="input-group-text glass-input-addon">
-                                <i data-feather="search" size="16"></i>
-                            </span>
-                            <input type="text" class="form-control glass-input" id="search" name="search" 
-                                   value="{{ search }}" placeholder="Invoice #, client name, phone...">
-                        </div>
-                    </div>
-                    
-                    <div class="col-md-2">
-                        <label for="status" class="form-label">Payment Status</label>
-                        <select class="form-select glass-input" id="status" name="status">
-                            <option value="">All Status</option>
-                            <option value="Paid" {% if status_filter == 'Paid' %}selected{% endif %}>Paid</option>
-                            <option value="Unpaid" {% if status_filter == 'Unpaid' %}selected{% endif %}>Unpaid</option>
-                            <option value="Partially Paid" {% if status_filter == 'Partially Paid' %}selected{% endif %}>Partially Paid</option>
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-2">
-                        <label for="client_id" class="form-label">Client</label>
-                        <select class="form-select glass-input" id="client_id" name="client_id">
-                            <option value="">All Clients</option>
-                            {% for client in clients %}
-                            <option value="{{ client.id }}" {% if client_filter == client.id|string %}selected{% endif %}>
-                                {{ client.name }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <div class="col-md-2">
-                        <label for="date_from" class="form-label">From Date</label>
-                        <input type="date" class="form-control glass-input" id="date_from" name="date_from" value="{{ date_from }}">
-                    </div>
-                    
-                    <div class="col-md-2">
-                        <label for="date_to" class="form-label">To Date</label>
-                        <input type="date" class="form-control glass-input" id="date_to" name="date_to" value="{{ date_to }}">
-                    </div>
-                    
-<div class="col-md-1">
-    <div class="d-flex gap-2 align-items-center">
-        <button type="submit" class="btn btn-primary glass-btn" title="Filter">
-            <i data-feather="filter" size="14"></i>
-        </button>
-        <a href="{{ url_for('invoice_management') }}" class="btn btn-outline-secondary glass-btn" title="Clear">
-            <i data-feather="x" size="12"></i>
-        </a>
+ 
+   <!-- Advanced Filters -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="glass-card p-4">
+      <form method="GET" class="row g-3 align-items-end">
+
+        <div class="col-md-3">
+          <label for="search" class="form-label">Search</label>
+          <div class="input-group">
+            <span class="input-group-text glass-input-addon">
+              <i data-feather="search" size="16"></i>
+            </span>
+            <input type="text" class="form-control glass-input" id="search" name="search" 
+              value="{{ search }}" placeholder="Invoice #, client name, phone...">
+          </div>
+        </div>
+
+        <div class="col-md-2">
+          <label for="status" class="form-label">Payment Status</label>
+          <select class="form-select glass-input" id="status" name="status">
+            <option value="">All Status</option>
+            <option value="Paid" {% if status_filter == 'Paid' %}selected{% endif %}>Paid</option>
+            <option value="Unpaid" {% if status_filter == 'Unpaid' %}selected{% endif %}>Unpaid</option>
+            <option value="Partially Paid" {% if status_filter == 'Partially Paid' %}selected{% endif %}>Partially Paid</option>
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label for="client_id" class="form-label">Client</label>
+          <select class="form-select glass-input" id="client_id" name="client_id">
+            <option value="">All Clients</option>
+            {% for client in clients %}
+            <option value="{{ client.id }}" {% if client_filter == client.id|string %}selected{% endif %}>
+              {{ client.name }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label for="date_from" class="form-label">From Date</label>
+          <input type="date" class="form-control glass-input" id="date_from" name="date_from" value="{{ date_from }}">
+        </div>
+
+        <div class="col-md-2">
+          <label for="date_to" class="form-label">To Date</label>
+          <input type="date" class="form-control glass-input" id="date_to" name="date_to" value="{{ date_to }}">
+        </div>
+
+        <!-- Button section fixed -->
+        <div class="col-md-1 d-flex align-items-end justify-content-center">
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary glass-btn d-flex align-items-center justify-content-center" title="Filter">
+              <i data-feather="filter" size="16"></i>
+            </button>
+            <a href="{{ url_for('invoice_management') }}" class="btn btn-outline-secondary glass-btn d-flex align-items-center justify-content-center" title="Clear">
+              <i data-feather="x" size="16"></i>
+            </a>
+          </div>
+        </div>
+
+      </form>
     </div>
+  </div>
 </div>
+
+
+
+
+
+
 
 
                 </form>
