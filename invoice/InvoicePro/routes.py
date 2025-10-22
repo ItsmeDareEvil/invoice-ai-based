@@ -398,24 +398,7 @@ def bulk_delete_invoices():
     return jsonify({'success': True})
 
 
-@app.route('/invoice/<int:id>/delete', methods=['POST'])
-@login_required
-def delete_invoice(id):
-    invoice = Invoice.query.get_or_404(id)
-    db.session.delete(invoice)
-    db.session.commit()
-    flash('Invoice deleted successfully.', 'success')
-    return redirect(url_for('invoice_management'))
 
-@app.route('/invoices/bulk_delete', methods=['POST'])
-@login_required
-def bulk_delete_invoices():
-    data = request.get_json()
-    ids = data.get('invoice_ids', [])
-    if ids:
-        Invoice.query.filter(Invoice.id.in_(ids)).delete(synchronize_session=False)
-        db.session.commit()
-    return jsonify({'success': True})
     
 @app.route('/clients')
 @login_required
