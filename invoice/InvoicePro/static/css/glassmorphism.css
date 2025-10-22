@@ -597,3 +597,34 @@ body {
 .table {
   background-color: var(--card-bg, #ffffff);
 }
+/* Allow dropdowns to escape table wrapper */
+.table-responsive {
+  overflow: visible !important; /* let dropdown overflow the table */
+}
+
+/* Make the table cell relative to position dropdown correctly */
+.table td.position-relative {
+  position: relative;
+}
+
+/* Ensure dropdown is on top of other rows */
+.table .dropdown-menu {
+  z-index: 2050;  /* higher than table rows */
+  min-width: 10rem; /* optional: adjust width */
+}
+
+/* Ensure table cells allow dropdowns to show */
+table {
+    overflow: visible; /* Allow dropdowns to escape table cells */
+}
+
+.item-row td {
+    position: relative; /* Needed for z-index on select */
+    overflow: visible;  /* Prevent clipping of dropdown */
+}
+
+/* Bootstrap select z-index fix (if using Bootstrap 5) */
+select.form-select {
+    z-index: 1000; 
+    position: relative;
+}

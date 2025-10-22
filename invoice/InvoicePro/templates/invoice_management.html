@@ -100,17 +100,9 @@
     </div>
   </div>
 </div>
-
-
-
-
-
-
-
-
-                </form>
-            </div>
+   </form>
         </div>
+       </div>
     </div>
     <br>
     <!-- Invoice List -->
@@ -235,7 +227,7 @@
                                     <span class="text-muted">-</span>
                                     {% endif %}
                                 </td>
-                                <td>
+                                <td style="position: relative;">
                                     <div class="btn-group btn-group-sm">
                                         <a href="{{ url_for('invoice_detail', id=invoice.id) }}" 
                                            class="btn btn-outline-primary" title="View Details">
@@ -251,25 +243,43 @@
                                             <i data-feather="shield" size="14"></i>
                                         </button>
                                         {% endif %}
-                                        <div class="dropdown">
-                                            <button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" 
-                                                    data-bs-toggle="dropdown"></button>
-                                            <ul class="dropdown-menu glass-dropdown">
-                                                <li><a class="dropdown-item" href="#">
-                                                    <i data-feather="edit" size="14" class="me-2"></i> Edit
-                                                </a></li>
-                                                <li><a class="dropdown-item" href="#">
-                                                    <i data-feather="copy" size="14" class="me-2"></i> Duplicate
-                                                </a></li>
-                                                <li><a class="dropdown-item" href="#">
-                                                    <i data-feather="send" size="14" class="me-2"></i> Send
-                                                </a></li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li><a class="dropdown-item text-danger" href="#" onclick="deleteInvoice({{ invoice.id }})">
-                                                    <i data-feather="trash" size="14" class="me-2"></i> Delete
-                                                </a></li>
-                                            </ul>
-                                        </div>
+                                        
+                                       <td class="position-relative">
+  <div class="dropdown">
+   <button class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+        type="button"
+        data-bs-toggle="dropdown"
+        data-bs-display="dynamic"  
+        aria-expanded="false">
+</button>
+
+    <ul class="dropdown-menu dropdown-menu-end glass-dropdown">
+      <li>
+        <a class="dropdown-item" href="{{ url_for('edit_invoice', id=invoice.id) }}">
+          <i data-feather="edit" class="me-2"></i> Edit
+        </a>
+      </li>
+      <li>
+        <a class="dropdown-item" href="{{ url_for('duplicate_invoice', id=invoice.id) }}">
+          <i data-feather="copy" class="me-2"></i> Duplicate
+        </a>
+      </li>
+      <li>
+        <a class="dropdown-item" href="{{ url_for('send_invoice', id=invoice.id) }}">
+          <i data-feather="send" class="me-2"></i> Send
+        </a>
+      </li>
+      <li><hr class="dropdown-divider"></li>
+      <li>
+        <a class="dropdown-item text-danger" href="#" onclick="deleteInvoice({{ invoice.id }})">
+          <i data-feather="trash" class="me-2"></i> Delete
+        </a>
+      </li>
+    </ul>
+  </div>
+</td>
+
+
                                     </div>
                                 </td>
                             </tr>

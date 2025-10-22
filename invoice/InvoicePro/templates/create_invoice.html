@@ -144,11 +144,11 @@ Subject to local jurisdiction only.</textarea>
                                     <th width="100">HSN Code</th>
                                     <th>Description *</th>
                                     <th width="80">Qty *</th>
-                                    <th width="60">Unit</th>
+                                    <th width="100">Unit</th>
                                     <th width="120">Rate *</th>
                                     <th width="80">Tax %</th>
                                     <th width="120">Amount</th>
-                                    <th width="50">Action</th>
+                                    <th width="80">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="itemsTableBody">
@@ -334,173 +334,85 @@ Subject to local jurisdiction only.</textarea>
     </tr>
 </template>
 {% endblock %}
-
 {% block scripts %}
 <script>
 let itemCounter = 0;
 let lineItems = [];
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize form
-    initializeInvoiceForm();
-    
-    // Add first item row
+    // Initialize first row
     addItemRow();
-    
-    // Client selection change
-    document.getElementById('client_id').addEventListener('change', function() {
-        handleClientSelection();
-        
-        {% if ai_enabled %}
-        // Load AI suggestions for selected client
-        if (this.value) {
-            loadAISuggestions(this.value);
-        }
-        {% endif %}
-    });
-    
-    // Auto-calculate due date (30 days from invoice date)
-    document.getElementById('invoice_date').addEventListener('change', function() {
-        const invoiceDate = new Date(this.value);
-        const dueDate = new Date(invoiceDate.getTime() + (30 * 24 * 60 * 60 * 1000));
-        document.getElementById('due_date').value = dueDate.toISOString().split('T')[0];
-    });
-    
+
+    // Add new item row button
+    document.getElementById('addItemBtn').addEventListener('click', addItemRow);
+
     // Form submission
     document.getElementById('invoiceForm').addEventListener('submit', function(e) {
         e.preventDefault();
         saveInvoice();
     });
-    
-    // Voice assistance
-    {% if ai_enabled %}
-    document.getElementById('voiceAssistBtn').addEventListener('click', function() {
-        startVoiceAssistance();
-    });
-    
-    document.getElementById('aiSuggestionsBtn').addEventListener('click', function() {
-        toggleAISuggestions();
-    });
-    
-    document.getElementById('aiAnalyzeBtn').addEventListener('click', function() {
-        analyzeInvoiceWithAI();
-    });
-    {% endif %}
 });
 
-//invoice saving 
-document.getElementById("saveInvoiceBtn").addEventListener("click", function (event) {
-  event.preventDefault();
-
-  const form = document.querySelector("form");
-  const btn = this;
-  const formData = new FormData(form);
-
-  btn.disabled = true;
-  btn.innerHTML = '<i data-feather="loader" class="me-1 spin"></i> Saving...';
-  feather.replace();
-
-  fetch(form.action, {
-    method: form.method,
-    body: formData,
-    headers: { "X-Requested-With": "XMLHttpRequest" } // 🔑 so Flask knows it's AJAX
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-       window.location.href = data.invoice_url; // redirect in same tab
-
-        form.reset();
-        alert("Invoice saved successfully!");
-      } else {
-        alert("Error: " + (data.error || "Could not save invoice."));
-      }
-    })
-    .catch(err => {
-      alert("Unexpected error: " + err);
-    })
-    .finally(() => {
-      btn.disabled = false;
-      btn.innerHTML = '<i data-feather="save" class="me-1"></i> Save Invoice';
-      feather.replace();
-    });
-});
-
-
-
-
-
-
-function initializeInvoiceForm() {
-    // Add item button
-    document.getElementById('addItemBtn').addEventListener('click', addItemRow);
-    
-    // Preview button
-    document.getElementById('previewBtn').addEventListener('click', previewInvoice);
-}
-
+// Add a new invoice item row
 function addItemRow(suggestion = null) {
     itemCounter++;
     const template = document.getElementById('itemRowTemplate');
-    const clone = template.content.cloneNode(true);
-    
-    // Update item number
-    clone.querySelector('.item-number').textContent = itemCounter;
-    
-    // Set suggestion data if provided
-    if (suggestion) {
-        clone.querySelector('[name="description"]').value = suggestion.description || '';
-        clone.querySelector('[name="quantity"]').value = suggestion.quantity || 1;
-        clone.querySelector('[name="unit_price"]').value = suggestion.unit_price || 0;
-        clone.querySelector('[name="hsn_code"]').value = suggestion.hsn_code || '';
-    }
-    
-    // Add event listeners
+    const clone = template.content.cloneNode(true); // deep clone
     const row = clone.querySelector('.item-row');
-    addItemEventListeners(row);
-    
-    // Append to table
-    document.getElementById('itemsTableBody').appendChild(clone);
-    
-    // Focus on description field
-    setTimeout(() => {
-        row.querySelector('[name="description"]').focus();
-    }, 100);
-}
 
-function addItemEventListeners(row) {
+    // Update item number
+    row.querySelector('.item-number').textContent = itemCounter;
+
+    // If suggestion passed (AI), populate fields
+    if (suggestion) {
+        row.querySelector('[name="description"]').value = suggestion.description || '';
+        row.querySelector('[name="quantity"]').value = suggestion.quantity || 1;
+        row.querySelector('[name="unit_price"]').value = suggestion.unit_price || 0;
+        row.querySelector('[name="hsn_code"]').value = suggestion.hsn_code || '';
+    }
+
+    // Add event listeners for calculation
     const inputs = row.querySelectorAll('input, select');
-    
     inputs.forEach(input => {
-        input.addEventListener('input', function() {
+        input.addEventListener('input', () => {
             calculateItemAmount(row);
             updateInvoiceSummary();
         });
-        
-        input.addEventListener('change', function() {
+        input.addEventListener('change', () => {
             calculateItemAmount(row);
             updateInvoiceSummary();
         });
     });
-    
-    // Remove item button
-    const removeBtn = row.querySelector('.remove-item-btn');
-    removeBtn.addEventListener('click', function() {
+
+    // Remove button
+    row.querySelector('.remove-item-btn').addEventListener('click', () => {
         removeItemRow(row);
     });
+
+    // Append row to table
+    document.getElementById('itemsTableBody').appendChild(clone);
+
+    // Re-render feather icons inside new row
+    feather.replace();
+
+    // Focus on description
+    setTimeout(() => {
+        row.querySelector('[name="description"]').focus();
+    }, 50);
 }
 
+// Remove item row
 function removeItemRow(row) {
     if (document.querySelectorAll('.item-row').length <= 1) {
         alert('At least one item is required');
         return;
     }
-    
     row.remove();
     updateItemNumbers();
     updateInvoiceSummary();
 }
 
+// Update row numbers
 function updateItemNumbers() {
     const rows = document.querySelectorAll('.item-row');
     rows.forEach((row, index) => {
@@ -508,126 +420,78 @@ function updateItemNumbers() {
     });
 }
 
+// Calculate line item amount
 function calculateItemAmount(row) {
     const quantity = parseFloat(row.querySelector('[name="quantity"]').value) || 0;
     const unitPrice = parseFloat(row.querySelector('[name="unit_price"]').value) || 0;
     const taxPercentage = parseFloat(row.querySelector('[name="tax_percentage"]').value) || 0;
-    
+
     const lineTotal = quantity * unitPrice;
     const taxAmount = (lineTotal * taxPercentage) / 100;
     const totalAmount = lineTotal + taxAmount;
-    
+
     row.querySelector('.item-amount').textContent = `₹${totalAmount.toFixed(2)}`;
 }
 
+// Update invoice summary
 function updateInvoiceSummary() {
     let subtotal = 0;
     let totalTax = 0;
-    
-    const rows = document.querySelectorAll('.item-row');
-    rows.forEach(row => {
+
+    document.querySelectorAll('.item-row').forEach(row => {
         const quantity = parseFloat(row.querySelector('[name="quantity"]').value) || 0;
         const unitPrice = parseFloat(row.querySelector('[name="unit_price"]').value) || 0;
         const taxPercentage = parseFloat(row.querySelector('[name="tax_percentage"]').value) || 0;
-        
+
         const lineTotal = quantity * unitPrice;
         const taxAmount = (lineTotal * taxPercentage) / 100;
-        
+
         subtotal += lineTotal;
         totalTax += taxAmount;
     });
-    
+
     const clientSelect = document.getElementById('client_id');
     const selectedClient = clientSelect.options[clientSelect.selectedIndex];
-    
-    // Determine tax split based on client state (simplified logic)
+
     let cgst = 0, sgst = 0, igst = 0;
-    
     if (selectedClient && selectedClient.dataset.address && selectedClient.dataset.address.includes('Tamil Nadu')) {
-        // Same state - CGST + SGST
         cgst = totalTax / 2;
         sgst = totalTax / 2;
     } else {
-        // Different state - IGST
         igst = totalTax;
     }
-    
+
     const total = subtotal + totalTax;
-    
-    // Update summary display
+
     document.getElementById('subtotalAmount').textContent = `₹${subtotal.toFixed(2)}`;
     document.getElementById('cgstAmount').textContent = `₹${cgst.toFixed(2)}`;
     document.getElementById('sgstAmount').textContent = `₹${sgst.toFixed(2)}`;
     document.getElementById('igstAmount').textContent = `₹${igst.toFixed(2)}`;
     document.getElementById('totalAmount').textContent = `₹${total.toFixed(2)}`;
-    
-    // Update amount in words
-    updateAmountInWords(total);
+
+    document.getElementById('amountInWords').textContent = `${convertNumberToWords(Math.floor(total))} Rupees Only`;
 }
 
-function updateAmountInWords(amount) {
-    // This would typically call a backend API to convert numbers to words
-    // For now, we'll use a simple implementation
-    const words = convertNumberToWords(Math.floor(amount));
-    document.getElementById('amountInWords').textContent = `${words} Rupees Only`;
+// Convert number to words (simplified)
+function convertNumberToWords(num) {
+    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+    const teens = ['Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+    const tens = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+    if (num===0) return 'Zero';
+    if (num<10) return ones[num];
+    if (num<20) return teens[num-10];
+    if (num<100) return tens[Math.floor(num/10)] + (num%10!==0 ? ' ' + ones[num%10] : '');
+    if (num<1000) return ones[Math.floor(num/100)] + ' Hundred' + (num%100!==0 ? ' ' + convertNumberToWords(num%100) : '');
+    if (num<100000) return convertNumberToWords(Math.floor(num/1000)) + ' Thousand' + (num%1000!==0 ? ' ' + convertNumberToWords(num%1000) : '');
+    if (num<10000000) return convertNumberToWords(Math.floor(num/100000)) + ' Lakh' + (num%100000!==0 ? ' ' + convertNumberToWords(num%100000) : '');
+    return convertNumberToWords(Math.floor(num/10000000)) + ' Crore' + (num%10000000!==0 ? ' ' + convertNumberToWords(num%10000000) : '');
 }
 
-function handleClientSelection() {
-    const clientSelect = document.getElementById('client_id');
-    const selectedOption = clientSelect.options[clientSelect.selectedIndex];
-    
-    if (selectedOption.value) {
-        const clientInfo = {
-            email: selectedOption.dataset.email,
-            phone: selectedOption.dataset.phone,
-            address: selectedOption.dataset.address,
-            gstin: selectedOption.dataset.gstin
-        };
-        
-        displayClientInfo(clientInfo);
-        showClientPreview(clientInfo);
-    } else {
-        hideClientInfo();
-    }
-}
-
-function displayClientInfo(clientInfo) {
-    const clientDetails = document.getElementById('clientDetails');
-    const clientInfoCard = document.getElementById('clientInfoCard');
-    
-    clientDetails.innerHTML = `
-        <div class="small">
-            ${clientInfo.email ? `<div><i data-feather="mail" size="14" class="me-1"></i> ${clientInfo.email}</div>` : ''}
-            ${clientInfo.phone ? `<div><i data-feather="phone" size="14" class="me-1"></i> ${clientInfo.phone}</div>` : ''}
-            ${clientInfo.gstin ? `<div><i data-feather="hash" size="14" class="me-1"></i> GSTIN: ${clientInfo.gstin}</div>` : ''}
-        </div>
-    `;
-    
-    clientInfoCard.style.display = 'block';
-    feather.replace();
-}
-
-function showClientPreview(clientInfo) {
-    const clientPreview = document.getElementById('clientPreview');
-    const clientInfoDiv = document.getElementById('clientInfo');
-    
-    clientInfoDiv.innerHTML = `
-        ${clientInfo.email || ''} ${clientInfo.phone ? `• ${clientInfo.phone}` : ''}
-    `;
-    
-    clientPreview.style.display = 'block';
-}
-
-function hideClientInfo() {
-    document.getElementById('clientInfoCard').style.display = 'none';
-    document.getElementById('clientPreview').style.display = 'none';
-}
-
+// Save invoice
 function saveInvoice() {
-    // Collect line items data
     const rows = document.querySelectorAll('.item-row');
     lineItems = [];
-    
+
     rows.forEach(row => {
         const description = row.querySelector('[name="description"]').value.trim();
         if (description) {
@@ -641,146 +505,14 @@ function saveInvoice() {
             });
         }
     });
-    
+
     if (lineItems.length === 0) {
         alert('Please add at least one item to the invoice.');
         return;
     }
-    
-    // Update hidden field
+
     document.getElementById('line_items').value = JSON.stringify(lineItems);
-    
-    // Submit form
-    const submitBtn = document.getElementById('saveInvoiceBtn');
-    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
-    submitBtn.disabled = true;
-    
     document.getElementById('invoiceForm').submit();
 }
-
-function previewInvoice() {
-    // Create a preview modal or new window
-    alert('Preview functionality will open a new window with invoice preview.');
-}
-
-// AI-powered functions
-{% if ai_enabled %}
-function startVoiceAssistance() {
-    const modal = new bootstrap.Modal(document.getElementById('voiceCommandModal'));
-    modal.show();
-}
-
-function toggleAISuggestions() {
-    const panel = document.getElementById('aiSuggestionsPanel');
-    const clientId = document.getElementById('client_id').value;
-    
-    if (!clientId) {
-        alert('Please select a client first to get AI suggestions.');
-        return;
-    }
-    
-    if (panel.style.display === 'none') {
-        panel.style.display = 'block';
-        loadAISuggestions(clientId);
-    } else {
-        panel.style.display = 'none';
-    }
-}
-
-function loadAISuggestions(clientId) {
-    const suggestionsList = document.getElementById('aiSuggestionsList');
-    
-    // Show loading
-    suggestionsList.innerHTML = `
-        <div class="text-center py-3">
-            <div class="spinner-border spinner-border-sm text-primary me-2"></div>
-            <small class="text-muted">Generating AI suggestions...</small>
-        </div>
-    `;
-    
-    // Fetch AI suggestions
-    fetch(`/api/ai_suggestions/${clientId}`)
-        .then(response => response.json())
-        .then(data => {
-            displayAISuggestions(data.suggestions || []);
-        })
-        .catch(error => {
-            console.error('Error loading AI suggestions:', error);
-            suggestionsList.innerHTML = `
-                <div class="text-center py-3">
-                    <small class="text-danger">Failed to load suggestions</small>
-                </div>
-            `;
-        });
-}
-
-function displayAISuggestions(suggestions) {
-    const suggestionsList = document.getElementById('aiSuggestionsList');
-    
-    if (suggestions.length === 0) {
-        suggestionsList.innerHTML = `
-            <div class="text-center py-3">
-                <small class="text-muted">No suggestions available for this client</small>
-            </div>
-        `;
-        return;
-    }
-    
-    const suggestionsHtml = suggestions.map(suggestion => `
-        <div class="suggestion-item d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
-            <div>
-                <div class="fw-medium">${suggestion.description}</div>
-                <small class="text-muted">
-                    Qty: ${suggestion.quantity} • Rate: ₹${suggestion.unit_price} 
-                    • Confidence: ${Math.round((suggestion.confidence || 0) * 100)}%
-                </small>
-            </div>
-            <button class="btn btn-sm btn-outline-primary" onclick="addAISuggestion(${JSON.stringify(suggestion).replace(/"/g, '&quot;')})">
-                Add
-            </button>
-        </div>
-    `).join('');
-    
-    suggestionsList.innerHTML = suggestionsHtml;
-}
-
-function addAISuggestion(suggestion) {
-    addItemRow(suggestion);
-    document.getElementById('ai_generated').value = 'true';
-}
-
-function analyzeInvoiceWithAI() {
-    // Implement AI analysis of current invoice
-    alert('AI Analysis: This invoice looks good! Recommended payment terms: 30 days.');
-}
-{% endif %}
-
-// Utility function for number to words conversion (simplified)
-function convertNumberToWords(num) {
-    const ones = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
-    const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
-    const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-    
-    if (num === 0) return 'Zero';
-    if (num < 10) return ones[num];
-    if (num < 20) return teens[num - 10];
-    if (num < 100) return tens[Math.floor(num / 10)] + (num % 10 !== 0 ? ' ' + ones[num % 10] : '');
-    if (num < 1000) return ones[Math.floor(num / 100)] + ' Hundred' + (num % 100 !== 0 ? ' ' + convertNumberToWords(num % 100) : '');
-    if (num < 100000) return convertNumberToWords(Math.floor(num / 1000)) + ' Thousand' + (num % 1000 !== 0 ? ' ' + convertNumberToWords(num % 1000) : '');
-    if (num < 10000000) return convertNumberToWords(Math.floor(num / 100000)) + ' Lakh' + (num % 100000 !== 0 ? ' ' + convertNumberToWords(num % 100000) : '');
-    
-    return convertNumberToWords(Math.floor(num / 10000000)) + ' Crore' + (num % 10000000 !== 0 ? ' ' + convertNumberToWords(num % 10000000) : '');
-}
-
-// Sticky summary positioning
-window.addEventListener('scroll', function() {
-    const summary = document.querySelector('.sticky-summary');
-    const rect = summary.getBoundingClientRect();
-    
-    if (rect.top <= 100) {
-        summary.style.position = 'sticky';
-        summary.style.top = '100px';
-    }
-});
 </script>
 {% endblock %}

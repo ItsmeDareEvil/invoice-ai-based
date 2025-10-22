@@ -401,9 +401,105 @@ def bulk_delete_invoices():
         db.session.commit()
     return jsonify({'success': True})
 
+@app.route('/invoice/<int:id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_invoice(id):
+    invoice = Invoice.query.get_or_404(id)
+
+    if request.method == 'POST':
+        # handle form submission to update invoice
+        invoice.notes = request.form.get('notes', invoice.notes)
+        invoice.terms_conditions = request.form.get('terms_conditions', invoice.terms_conditions)
+        # ... update other fields as needed
+        db.session.commit()
+        flash('Invoice updated successfully!', 'success')
+        return redirect(url_for('invoice_detail', id=invoice.id))
+
+    # GET request — show form pre-filled with invoice data
+    clients = Client.query.order_by(Client.name).all()
+    return render_template('edit_invoice.html', invoice=invoice, clients=clients)
 
 
     
+
+
+
+@app.route('/invoice/<int:id>/duplicate', methods=['POST'])
+@login_required
+def duplicate_invoice(id):
+    # Get the invoice to duplicate
+    invoice = Invoice.query.get_or_404(id)
+
+    # Create a copy
+    new_invoice = Invoice(
+        invoice_number=generate_invoice_number(),
+        client_id=invoice.client_id,
+        invoice_date=datetime.now().date(),
+        due_date=invoice.due_date,
+        notes=invoice.notes,
+        terms_conditions=invoice.terms_conditions,
+        ai_generated=invoice.ai_generated,
+        voice_command_created=invoice.voice_command_created
+    )
+    db.session.add(new_invoice)
+    db.session.flush()  # to get new_invoice.id
+
+    # Duplicate line items
+    for item in invoice.line_items:
+        new_item = InvoiceLineItem(
+            invoice_id=new_invoice.id,
+            sr_no=item.sr_no,
+            hsn_code=item.hsn_code,
+            description=item.description,
+            quantity=item.quantity,
+            unit=item.unit,
+            unit_price=item.unit_price,
+            tax_percentage=item.tax_percentage,
+            tax_amount=item.tax_amount,
+            total_amount=item.total_amount,
+            cost_price=item.cost_price,
+            ai_suggested=item.ai_suggested
+        )
+        db.session.add(new_item)
+
+    db.session.commit()
+    flash("Invoice duplicated successfully!", "success")
+    return redirect(url_for('invoice_detail', id=new_invoice.id))
+
+
+
+@app.route('/invoice/<int:id>/send', methods=['GET', 'POST'])
+@login_required
+def send_invoice(id):
+    invoice = Invoice.query.get_or_404(id)
+
+    if request.method == 'POST':
+        # handle sending invoice via email or other method
+        recipient_email = invoice.client.email
+        if recipient_email:
+            # Call your send_email function here
+            send_invoice_email(invoice, recipient_email)
+            flash(f'Invoice sent to {recipient_email} successfully!', 'success')
+        else:
+            flash('Client has no email set.', 'warning')
+        return redirect(url_for('invoice_detail', id=invoice.id))
+
+    # GET request - maybe show a modal or confirmation page
+    return render_template('send_invoice.html', invoice=invoice)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @app.route('/clients')
 @login_required
 def client_management():
@@ -847,6 +943,8 @@ def api_analytics_data():
     except Exception as e:
         logging.error(f"Analytics API failed: {e}")
         return jsonify({'error': str(e)})
+
+
 
 # Error Handlers
 
