@@ -40,7 +40,7 @@
     </div>
     
     <!-- Invoice Form -->
-    <form method="POST" id="invoiceForm">
+    <form method="POST" id="invoiceForm" target="_blank">
         <div class="row">
             <!-- Left Column - Invoice Details -->
             <div class="col-lg-8">
@@ -401,16 +401,65 @@ function addItemRow(suggestion = null) {
     }, 50);
 }
 
+
+
+
+
+
+
+
+
+
 // Remove item row
 function removeItemRow(row) {
-    if (document.querySelectorAll('.item-row').length <= 1) {
+    const rows = document.querySelectorAll('.item-row');
+
+    // 1. Check if the row is empty
+    const description = row.querySelector('[name="description"]').value.trim();
+    const quantity = parseFloat(row.querySelector('[name="quantity"]').value) || 0;
+    const unitPrice = parseFloat(row.querySelector('[name="unit_price"]').value) || 0;
+
+    if (!description && quantity === 0 && unitPrice === 0) {
+        // disable delete for empty row
+        row.querySelector('.remove-item-btn').disabled = true;
+        return; // do not delete
+    }
+
+    // 2. Check if it's the last row
+    if (rows.length <= 1) {
         alert('At least one item is required');
         return;
     }
+
+    // 3. Remove row normally
     row.remove();
     updateItemNumbers();
     updateInvoiceSummary();
 }
+
+// Enable delete button when a row is edited
+document.addEventListener('input', function(e) {
+    const row = e.target.closest('.item-row');
+    if (!row) return;
+
+    const deleteBtn = row.querySelector('.remove-item-btn');
+    const description = row.querySelector('[name="description"]').value.trim();
+    const quantity = parseFloat(row.querySelector('[name="quantity"]').value) || 0;
+    const unitPrice = parseFloat(row.querySelector('[name="unit_price"]').value) || 0;
+
+    deleteBtn.disabled = (!description && quantity === 0 && unitPrice === 0);
+});
+
+
+
+
+
+
+
+
+
+
+
 
 // Update row numbers
 function updateItemNumbers() {

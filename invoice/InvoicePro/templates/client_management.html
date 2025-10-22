@@ -113,14 +113,14 @@
                             <span class="input-group-text glass-input-addon">
                                 <i data-feather="search" size="16"></i>
                             </span>
-                            <input type="text" class="form-control glass-input" id="search" name="search" 
+                            <input type="text" class="form-control filter-input" id="search" name="search" 
                                    value="{{ search }}" placeholder="Name, email, phone...">
                         </div>
                     </div>
                     
                     <div class="col-md-2">
                         <label for="type" class="form-label">Client Type</label>
-                        <select class="form-select glass-input" id="type" name="type">
+                        <select  class="form-control filter-input" id="type" name="type">
                             <option value="">All Types</option>
                             <option value="Regular" {% if client_type == 'Regular' %}selected{% endif %}>Regular</option>
                             <option value="Premium" {% if client_type == 'Premium' %}selected{% endif %}>Premium</option>
@@ -130,7 +130,7 @@
                     
                     <div class="col-md-2">
                         <label for="lead_stage" class="form-label">Lead Stage</label>
-                        <select class="form-select glass-input" id="lead_stage" name="lead_stage">
+                        <select  class="form-control filter-input" id="lead_stage" name="lead_stage">
                             <option value="">All Stages</option>
                             <option value="New">New</option>
                             <option value="In Discussion">In Discussion</option>
@@ -142,7 +142,7 @@
                     
                     <div class="col-md-2">
                         <label for="risk_level" class="form-label">Risk Level</label>
-                        <select class="form-select glass-input" id="risk_level" name="risk_level">
+                        <select  class="form-control filter-input" id="risk_level" name="risk_level">
                             <option value="">All Levels</option>
                             <option value="Low">Low Risk</option>
                             <option value="Medium">Medium Risk</option>
@@ -150,14 +150,19 @@
                         </select>
                     </div>
                     
-                    <div class="col-md-2">
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary glass-btn" title="Filter">
-                                <i data-feather="filter" size="16"></i>
-                            </button>
-                            <a href="{{ url_for('client_management') }}" class="btn btn-outline-secondary glass-btn" title="Clear">
-                                <i data-feather="x" size="16"></i>
-                            </a>
+      <div class="col-md-1 d-flex align-items-end justify-content-center">
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary glass-btn d-flex align-items-center justify-content-center" title="Filter">
+              <i data-feather="filter" size="16"></i>
+            </button>
+            <a href="{{ url_for('invoice_management') }}" class="btn btn-outline-secondary glass-btn d-flex align-items-center justify-content-center" title="Clear">
+              <i data-feather="x" size="16"></i>
+            </a>
+          </div>
+        </div>
+
+
+
                         </div>
                     </div>
                 </form>
@@ -376,7 +381,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const listViewRadio = document.getElementById('listView');
     const gridContainer = document.getElementById('gridViewContainer');
     const listContainer = document.getElementById('listViewContainer');
-    
+     const tableBody = document.getElementById('clientsTableBody'); // your table body id
+    originalClientRows = Array.from(tableBody.children).map(row => row.cloneNode(true)); 
     gridViewRadio.addEventListener('change', function() {
         if (this.checked) {
             gridContainer.style.display = 'block';
@@ -471,6 +477,25 @@ function exportClientsToExcel() {
 function exportClientsToPDF() {
     window.location.href = '/api/export/clients/pdf?' + new URLSearchParams(window.location.search);
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const tableBody = document.getElementById('clientsTableBody'); // table body
+    const originalRows = Array.from(tableBody.children).map(row => row.cloneNode(true)); // save original rows
+    const clearBtn = document.getElementById('clearFilterBtn');
+    const filterInputs = document.querySelectorAll('.filter-input'); // your search fields should have this class
+
+    clearBtn.addEventListener('click', function() {
+        // Clear input fields
+        filterInputs.forEach(input => input.value = '');
+
+        // Restore table rows
+        tableBody.innerHTML = '';
+        originalRows.forEach(row => tableBody.appendChild(row.cloneNode(true)));
+    });
+});
+
+    
+
 </script>
 
 <style>

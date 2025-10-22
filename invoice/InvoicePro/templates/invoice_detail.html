@@ -200,10 +200,20 @@
         }, 10000);  // 10 seconds
     </script>
     {% endif %}
- <a href="{{ url_for('create_invoice') }}" class="btn btn-outline-secondary mt-3">
+
+
+
+
+
+ <a href="{{ url_for('create_invoice') }}" onclick="goBack()" class="btn btn-outline-secondary mt-3">
     <i data-feather="arrow-left"></i> Back
 </a>
-
+<script>
+function goBack() {
+    // Close this tab if it was opened via JS or target=_blank
+    window.close();
+}
+</script>
 
 </body>
 </html>
