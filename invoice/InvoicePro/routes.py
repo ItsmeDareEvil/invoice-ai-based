@@ -18,6 +18,9 @@ from voice_service import voice_processor, voice_invoice_builder
 from analytics_engine import AnalyticsEngine
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
+import io
+import csv
+from flask import Response, request
 
 # Initialize analytics engine
 analytics_engine = AnalyticsEngine(db.session)
@@ -401,6 +404,17 @@ def bulk_delete_invoices():
         db.session.commit()
     return jsonify({'success': True})
 
+@app.route('/invoices/<int:id>', methods=['DELETE'])
+@login_required
+def delete_invoice1(id):
+    invoice = Invoice.query.get_or_404(id)
+    try:
+        db.session.delete(invoice)
+        db.session.commit()
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 
@@ -501,6 +515,30 @@ def send_invoice(id):
         return {"success": True, "message": f"Invoice sent to {recipient_email} successfully!"}
     except Exception as e:
         return {"success": False, "message": f"Failed to send invoice: {str(e)}"}, 500
+
+
+
+
+
+@app.route('/bulk_export', methods=['POST'])
+@login_required
+def bulk_export():
+    data = request.get_json()
+    invoice_ids = data.get('ids', [])
+    invoices = Invoice.query.filter(Invoice.id.in_(invoice_ids)).all()
+
+    # Generate CSV
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Invoice Number', 'Client', 'Total Amount'])  # header
+    for inv in invoices:
+        writer.writerow([inv.invoice_number, inv.client.name, inv.total_amount])
+
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={"Content-Disposition": "attachment;filename=invoices.csv"}
+    )
 
 
 

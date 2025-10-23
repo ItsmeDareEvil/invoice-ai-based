@@ -528,12 +528,31 @@ function bulkDelete() {
 
 function bulkExport() {
     const selectedIds = Array.from(document.querySelectorAll('.invoice-checkbox:checked')).map(cb => cb.value);
-    if (selectedIds.length === 0) return;
-    
-    // Implement bulk export
-    console.log('Bulk export:', selectedIds);
-    alert('Export functionality for selected invoices');
+    if (selectedIds.length === 0) return alert('No invoices selected');
+
+    // Send selected IDs to backend
+    fetch('/bulk_export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selectedIds })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error('Export failed');
+        return res.blob();
+    })
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'invoices.csv'; // or .xlsx if you generate Excel
+        a.click();
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Failed to export invoices');
+    });
 }
+
 
 // Filter functions
 function checkInvoiceFilter(button) {
