@@ -106,3 +106,9 @@
   border: 1px solid #ccc;
 }
 .btn-upload:hover { background-color: #e2e6ea; }
+    .dropdown-menu {
+    z-index: 2000 !important;
+}
+.table-responsive {
+    overflow: visible !important;
+}

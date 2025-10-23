@@ -401,23 +401,41 @@ def bulk_delete_invoices():
         db.session.commit()
     return jsonify({'success': True})
 
+
+
+
+
+
+
 @app.route('/invoice/<int:id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_invoice(id):
     invoice = Invoice.query.get_or_404(id)
 
     if request.method == 'POST':
-        # handle form submission to update invoice
+        # Update fields from the form
         invoice.notes = request.form.get('notes', invoice.notes)
         invoice.terms_conditions = request.form.get('terms_conditions', invoice.terms_conditions)
-        # ... update other fields as needed
+        
+        # Update client if changed
+        client_id = request.form.get('client_id')
+        if client_id:
+            invoice.client_id = int(client_id)
+
+        # You can update other invoice fields here as needed
+
         db.session.commit()
         flash('Invoice updated successfully!', 'success')
+        
+        # Always return a response after POST
         return redirect(url_for('invoice_detail', id=invoice.id))
 
-    # GET request — show form pre-filled with invoice data
+    # GET request — show edit form
     clients = Client.query.order_by(Client.name).all()
+    
+    # Always return a response
     return render_template('edit_invoice.html', invoice=invoice, clients=clients)
+
 
 
     
@@ -486,6 +504,9 @@ def send_invoice(id):
 
     # GET request - maybe show a modal or confirmation page
     return render_template('send_invoice.html', invoice=invoice)
+
+
+
 
 
 

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Invoice{% endblock %}
+
+{% block content %}
+
+<style>
+    /* Full viewport container */
+    .edit-invoice-container {
+        height: 100vh; /* full screen */
+        display: flex;
+        flex-direction: column;
+        padding: 20px 30px;
+        box-sizing: border-box;
+    }
+
+    /* Heading fixed at top */
+    .edit-invoice-header {
+        margin-bottom: 20px;
+        flex-shrink: 0;
+    }
+
+    /* Scrollable form area */
+    .edit-invoice-form {
+        flex: 1 1 auto; /* take remaining space */
+        overflow-y: auto; /* scroll if content exceeds */
+        padding-right: 10px; /* avoid scrollbar overlap */
+    }
+
+    /* Buttons container fixed at bottom */
+    .edit-buttons {
+        flex-shrink: 0;
+        display: flex;
+        gap: 15px;
+        margin-top: 20px;
+        padding-top: 10px;
+        border-top: 1px solid #e0e0e0;
+        /* removed background-color to make it transparent */
+        background-color: transparent;
+    }
+
+    textarea {
+        width: 100%;
+        resize: vertical;
+    }
+</style>
+
+<div class="edit-invoice-container">
+    <h2 class="edit-invoice-header">Edit Invoice {{ invoice.invoice_number }}</h2>
+
+    <form method="POST" class="edit-invoice-form">
+        <div class="mb-3">
+            <label for="client" class="form-label">Client</label>
+            <select class="form-select" name="client_id" id="client">
+                {% for client in clients %}
+                    <option value="{{ client.id }}" {% if client.id == invoice.client_id %}selected{% endif %}>
+                        {{ client.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="notes" class="form-label">Notes</label>
+            <textarea class="form-control" name="notes" id="notes" rows="4">{{ invoice.notes }}</textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="terms_conditions" class="form-label">Terms & Conditions</label>
+            <textarea class="form-control" id="terms_conditions" name="terms_conditions" rows="8">{{ invoice.terms_conditions }}</textarea>
+        </div>
+
+        <!-- Buttons at bottom -->
+        <div class="edit-buttons"  style="padding-bottom: 40px;">
+            <button type="submit" class="btn btn-primary">Update Invoice</button>
+            <a href="{{ url_for('invoice_management') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+        <div></div>
+    </form>
+</div>
+
+{% endblock %}

@@ -152,12 +152,19 @@
                     
       <div class="col-md-1 d-flex align-items-end justify-content-center">
           <div class="d-flex gap-2">
-            <button type="submit" class="btn btn-primary glass-btn d-flex align-items-center justify-content-center" title="Filter">
-              <i data-feather="filter" size="16"></i>
-            </button>
-            <a href="{{ url_for('invoice_management') }}" class="btn btn-outline-secondary glass-btn d-flex align-items-center justify-content-center" title="Clear">
-              <i data-feather="x" size="16"></i>
-            </a>
+           <button type="submit"
+            class="btn btn-primary glass-btn d-flex align-items-center justify-content-center"
+            title="Filter"
+            onclick="checkInvoiceFilter(event)">
+      <i data-feather="filter" size="16"></i>
+    </button>
+         <a href="#" 
+   class="btn btn-outline-secondary glass-btn d-flex align-items-center justify-content-center" 
+   title="Clear"
+   onclick="clearFilters(event)">
+    <i data-feather="x" size="16"></i>
+</a>
+
           </div>
         </div>
 
@@ -494,7 +501,46 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-    
+
+
+
+function checkInvoiceFilter(event) {
+    // Prevent empty filters from being submitted
+    const filters = document.querySelectorAll('.filter-input');
+    let hasValue = false;
+
+    filters.forEach(input => {
+        if (input.value.trim() !== '') {
+            hasValue = true;
+        }
+    });
+
+    if (!hasValue) {
+        event.preventDefault(); // Stop form submit
+        alert("Please enter at least one filter before searching.");
+    }
+}
+function clearFilters(event) {
+    event.preventDefault();
+
+    // Get all filter inputs (adjust class name if needed)
+    const filters = document.querySelectorAll('.filter-input');
+    let hasValue = false;
+
+    filters.forEach(input => {
+        if (input.value.trim() !== '') {
+            hasValue = true;
+        }
+    });
+
+    if (hasValue) {
+        // If any filter has value → reload to clear filters
+        window.location.href = "{{ url_for('client_management') }}";
+    } else {
+        // If no filters → do nothing
+        console.log("No filters to clear.");
+    }
+}
 
 </script>
 
