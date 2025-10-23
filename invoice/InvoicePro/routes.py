@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 from sqlalchemy import func, and_, or_, extract, desc
 from sqlalchemy.orm import joinedload
 
-from app import app, db
+from app import app, db, mail 
 from models import *
 from utils import *
 from pdf_generator import generate_invoice_pdf, generate_challan_pdf
@@ -445,74 +445,62 @@ def edit_invoice(id):
 @app.route('/invoice/<int:id>/duplicate', methods=['POST'])
 @login_required
 def duplicate_invoice(id):
-    # Get the invoice to duplicate
     invoice = Invoice.query.get_or_404(id)
 
-    # Create a copy
-    new_invoice = Invoice(
-        invoice_number=generate_invoice_number(),
-        client_id=invoice.client_id,
-        invoice_date=datetime.now().date(),
-        due_date=invoice.due_date,
-        notes=invoice.notes,
-        terms_conditions=invoice.terms_conditions,
-        ai_generated=invoice.ai_generated,
-        voice_command_created=invoice.voice_command_created
-    )
-    db.session.add(new_invoice)
-    db.session.flush()  # to get new_invoice.id
-
-    # Duplicate line items
-    for item in invoice.line_items:
-        new_item = InvoiceLineItem(
-            invoice_id=new_invoice.id,
-            sr_no=item.sr_no,
-            hsn_code=item.hsn_code,
-            description=item.description,
-            quantity=item.quantity,
-            unit=item.unit,
-            unit_price=item.unit_price,
-            tax_percentage=item.tax_percentage,
-            tax_amount=item.tax_amount,
-            total_amount=item.total_amount,
-            cost_price=item.cost_price,
-            ai_suggested=item.ai_suggested
+    try:
+        new_invoice = Invoice(
+            client_id=invoice.client_id,
+            notes=invoice.notes,
+            terms_conditions=invoice.terms_conditions,
+            total_amount=invoice.total_amount,
+            payment_status='Unpaid',
+            invoice_date=datetime.utcnow(),
+            # make sure invoice_number is unique, e.g.,
+            invoice_number=f"{invoice.invoice_number}-COPY"
         )
-        db.session.add(new_item)
 
-    db.session.commit()
-    flash("Invoice duplicated successfully!", "success")
-    return redirect(url_for('invoice_detail', id=new_invoice.id))
+        db.session.add(new_invoice)
+        db.session.commit()
+        return jsonify({'message': 'Invoice duplicated successfully!'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': f'Failed to duplicate invoice: {str(e)}'}), 400
 
 
 
-@app.route('/invoice/<int:id>/send', methods=['GET', 'POST'])
+from fpdf import FPDF
+
+def generate_invoice_pdf(invoice):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", 'B', 16)
+    pdf.cell(0, 10, f"Invoice #{invoice.invoice_number}", ln=True)
+
+    pdf.set_font("Arial", '', 12)
+    pdf.cell(0, 10, f"Client: {invoice.client.name}", ln=True)
+    pdf.cell(0, 10, f"Amount: ₹{invoice.total_amount}", ln=True)
+    pdf.multi_cell(0, 10, f"Notes:\n{invoice.notes}\n\nTerms & Conditions:\n{invoice.terms_conditions}")
+
+    pdf_file = f"Invoice_{invoice.invoice_number}.pdf"
+    pdf.output(pdf_file)
+    return pdf_file
+
+
+@app.route('/invoice/<int:id>/send', methods=['POST'])
 @login_required
 def send_invoice(id):
     invoice = Invoice.query.get_or_404(id)
+    recipient_email = invoice.client.email
 
-    if request.method == 'POST':
-        # handle sending invoice via email or other method
-        recipient_email = invoice.client.email
-        if recipient_email:
-            # Call your send_email function here
-            send_invoice_email(invoice, recipient_email)
-            flash(f'Invoice sent to {recipient_email} successfully!', 'success')
-        else:
-            flash('Client has no email set.', 'warning')
-        return redirect(url_for('invoice_detail', id=invoice.id))
+    if not recipient_email:
+        return {"success": False, "message": "Client has no email set."}, 400
 
-    # GET request - maybe show a modal or confirmation page
-    return render_template('send_invoice.html', invoice=invoice)
-
-
-
-
-
-
-
-
-
+    try:
+        send_invoice_email(invoice, recipient_email)
+        return {"success": True, "message": f"Invoice sent to {recipient_email} successfully!"}
+    except Exception as e:
+        return {"success": False, "message": f"Failed to send invoice: {str(e)}"}, 500
 
 
 

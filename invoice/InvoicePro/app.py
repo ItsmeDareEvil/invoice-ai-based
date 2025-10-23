@@ -5,6 +5,10 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
 from datetime import datetime
+from flask_mail import Mail
+from flask import render_template, make_response, flash, redirect, url_for
+from flask_login import login_required
+
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
 
@@ -36,6 +40,49 @@ os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 # Initialize SQLAlchemy
 db = SQLAlchemy(model_class=Base)
 db.init_app(app)
+
+'''
+app.config.update(
+    MAIL_SERVER='smtp.gmail.com',
+    MAIL_PORT=587,
+    MAIL_USE_TLS=True,
+    MAIL_USERNAME='dummail2004@gmail.com',
+    MAIL_PASSWORD='caputdraconas'
+)'''
+import smtplib
+from email.message import EmailMessage
+
+def send_invoice_email(invoice, recipient_email):
+    # Build your email message
+    msg = EmailMessage()
+    msg['Subject'] = f"Invoice #{invoice.invoice_number}"
+    msg['From'] = "dummail2004@gmail.com"  # replace with your sender email
+    msg['To'] = recipient_email
+    msg.set_content(f"Dear {invoice.client.name},\n\nPlease find attached Invoice #{invoice.invoice_number}.\n\nThanks!")
+
+    # Optional: attach PDF (if you have a PDF file path)
+    pdf_path = f"invoices/invoice_{invoice.id}.pdf"
+    try:
+        with open(pdf_path, 'rb') as f:
+            pdf_data = f.read()
+        msg.add_attachment(pdf_data, maintype='application', subtype='pdf', filename=f"Invoice_{invoice.invoice_number}.pdf")
+    except FileNotFoundError:
+        print("Warning: PDF not found, sending email without attachment.")
+
+    # Send email via SMTP (example using Gmail)
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login('your_email@example.com', 'your_app_password')  # use app password
+            smtp.send_message(msg)
+    except Exception as e:
+        raise Exception(f"SMTP failed: {e}")
+
+mail = Mail(app)
+
+
+# Optional: specify path to wkhtmltopdf if not in PATH
+#PDFKIT_CONFIG = pdfkit.configuration(wkhtmltopdf=r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe")
+
 
 # Import models and routes after db initialization
 with app.app_context():

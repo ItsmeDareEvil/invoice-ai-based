@@ -108,6 +108,34 @@ def generate_invoice_number():
         invoice_number = f"AI-INV-{date_str}-{today_count:03d}-{random_component}"
     
     return invoice_number
+import smtplib
+from email.message import EmailMessage
+
+def send_invoice_email(invoice, recipient_email):
+    # Build your email message
+    msg = EmailMessage()
+    msg['Subject'] = f"Invoice #{invoice.invoice_number}"
+    msg['From'] = "your_email@example.com"  # replace with your sender email
+    msg['To'] = recipient_email
+    msg.set_content(f"Dear {invoice.client.name},\n\nPlease find attached Invoice #{invoice.invoice_number}.\n\nThanks!")
+
+    # Optional: attach PDF (if you have a PDF file path)
+    pdf_path = f"invoices/invoice_{invoice.id}.pdf"
+    try:
+        with open(pdf_path, 'rb') as f:
+            pdf_data = f.read()
+        msg.add_attachment(pdf_data, maintype='application', subtype='pdf', filename=f"Invoice_{invoice.invoice_number}.pdf")
+    except FileNotFoundError:
+        print("Warning: PDF not found, sending email without attachment.")
+
+    # Send email via SMTP (example using Gmail)
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            smtp.login('your_email@example.com', 'your_app_password')  # use app password
+            smtp.send_message(msg)
+    except Exception as e:
+        raise Exception(f"SMTP failed: {e}")
+
 
 def generate_challan_number():
     """Generate unique delivery challan number"""

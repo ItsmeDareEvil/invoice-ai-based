@@ -456,37 +456,48 @@ function editInvoice(invoiceId) {
 
 function duplicateInvoice(invoiceId) {
     if (confirm('Duplicate this invoice?')) {
-        fetch(`/invoices/${invoiceId}/duplicate`, {
+        fetch(`/invoice/${invoiceId}/duplicate`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             }
-        }).then(response => {
+        })
+        .then(response => {
             if (response.ok) {
+                alert('Invoice duplicated successfully!');
                 window.location.reload();
             } else {
-                alert('Failed to duplicate invoice.');
+                response.json().then(data => {
+                    alert(data.message || 'Failed to duplicate invoice.');
+                }).catch(() => {
+                    alert('Failed to duplicate invoice1.');
+                });
             }
-        }).catch(error => {
-            console.error('Error duplicating invoice:', error);
-            alert('Error duplicating invoice.');
-        });
+        })
+        .catch(() => alert('Failed to duplicate invoice.'));
     }
 }
 
+
 function sendInvoice(invoiceId) {
-    // Implement send functionality (email, etc.)
-    console.log('Send invoice:', invoiceId);
-    // You can open a modal for sending options
-    const modalElement = document.getElementById('sendInvoiceModal');
-    if (modalElement) {
-        const modal = new bootstrap.Modal(modalElement);
-        modal.show();
-    } else {
-        // If modal doesn't exist, show a message
-        alert('Send functionality for invoice: ' + invoiceId);
-    }
+    fetch(`/invoice/${invoiceId}/send`, { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(err => alert("Unexpected error: " + err));
 }
+
+
+
+
+
+
+
 
 function verifyInvoiceOnBlockchain(invoiceId) {
     console.log('Verify invoice on blockchain:', invoiceId);
