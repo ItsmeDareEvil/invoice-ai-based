@@ -22,9 +22,9 @@
                     <div class="col-md-4 text-end">
                         <div class="d-flex gap-2 justify-content-end">
                             {% if ai_enabled %}
-                            <button class="btn btn-success glass-btn" id="voiceAssistBtn">
-                                <i data-feather="mic" class="me-1"></i> Voice Assist
-                            </button>
+                         <button class="btn btn-success glass-btn" id="voiceCreateBtn">
+  <i data-feather="mic" class="me-1"></i> Voice Assist
+</button>
                             <button class="btn btn-info glass-btn" data-bs-toggle="modal" data-bs-target="#documentScannerModal">
                                 <i data-feather="camera" class="me-1"></i> Scan Document
                             </button>
@@ -181,7 +181,7 @@ Subject to local jurisdiction only.</textarea>
                 <!-- Invoice Summary -->
                 <div class="glass-card p-4 mb-4 sticky-summary">
                     <h5 class="fw-bold mb-3">
-                        <i data-feather="calculator" class="me-2 text-primary"></i>
+                        <i data-feather="cpu" class="me-2 text-primary"></i>
                         Invoice Summary
                     </h5>
                     
@@ -340,6 +340,13 @@ let itemCounter = 0;
 let lineItems = [];
 
 document.addEventListener('DOMContentLoaded', function() {
+     const voiceBtn = document.getElementById("voiceCreateBtn");
+    if (!voiceBtn) return; // Stop if button doesn't exist
+
+    voiceBtn.addEventListener("click", () => {
+        console.log("✅ Voice button clicked");
+        // Start SpeechRecognition here
+    });
     // Initialize first row
     addItemRow();
 
@@ -563,5 +570,49 @@ function saveInvoice() {
     document.getElementById('line_items').value = JSON.stringify(lineItems);
     document.getElementById('invoiceForm').submit();
 }
+document.addEventListener("DOMContentLoaded", () => {
+   const voiceBtn = document.getElementById("voiceCreateBtn");
+
+  if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+    alert("Your browser does not support voice recognition.");
+    return;
+  }
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+
+  recognition.lang = "en-IN"; // you can change this locale
+  recognition.continuous = false;
+  recognition.interimResults = false;
+
+  voiceBtn.addEventListener("click", () => {
+    recognition.start();
+    voiceBtn.classList.add("active");
+    voiceBtn.innerHTML = '<i data-feather="mic-off" class="me-1"></i> Listening...';
+    feather.replace();
+  });
+
+  recognition.onresult = (event) => {
+    const command = event.results[0][0].transcript.trim();
+    console.log("Recognized Command:", command);
+
+    // Example: simple command handling
+    if (command.toLowerCase().includes("create invoice")) {
+      window.location.href = "/create_invoice";
+    } else if (command.toLowerCase().includes("open dashboard")) {
+      window.location.href = "/dashboard";
+    } else {
+      alert("Command not recognized: " + command);
+    }
+  };
+
+  recognition.onend = () => {
+    voiceBtn.classList.remove("active");
+    voiceBtn.innerHTML = '<i data-feather="mic" class="me-1"></i> Voice Assist';
+    feather.replace();
+  };
+});
+
+
 </script>
 {% endblock %}
