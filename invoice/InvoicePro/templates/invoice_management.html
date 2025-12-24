@@ -608,6 +608,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+function showGrid() {
+    const container = document.getElementById("gridViewContainer");
+    container.classList.remove("list-view");
+    container.classList.add("grid-view");
+}
+
+function showList() {
+    const container = document.getElementById("gridViewContainer");
+    container.classList.remove("grid-view");
+    container.classList.add("list-view");
+}
+
 </script>
 <script src="{{ url_for('static', filename='js/voice-command.js') }}"></script>
 <script>

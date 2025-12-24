@@ -645,6 +645,7 @@ select.form-select {
     position: relative;
 }
 
+
 .glass-dropdown {
     backdrop-filter: blur(10px);
     background: rgba(255, 255, 255, 0.9);
@@ -671,4 +672,42 @@ select.form-select {
 .btn-group-sm > .dropdown-toggle {
     padding-left: 0.75rem;
     padding-right: 0.75rem;
+}
+/* Grid View */
+#gridViewContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+}
+
+/* Card consistency */
+#gridViewContainer .card {
+    height: 100%;
+}
+
+/* List view table spacing (optional) */
+#listViewContainer table {
+    margin-bottom: 0;
+}
+/* === Dropdown Fix (FINAL) === */
+.glass-card {
+    overflow: visible !important;
+}
+
+.dropdown {
+    position: relative;
+}
+
+.dropdown-menu {
+    z-index: 1060 !important;
+}
+
+.glass-dropdown {
+    position: absolute !important;
+    z-index: 2000 !important;
+}
+/* 🔥 FIX: allow dropdowns inside header glass card */
+.no-transform,
+.no-transform:hover {
+    transform: none !important;
 }
